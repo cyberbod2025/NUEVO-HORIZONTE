@@ -1,0 +1,151 @@
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MODULES } from '../../data/curriculum';
+import { LESSONS_V2 } from '../../data/lessonsV2';
+import { normalizeLesson } from '../../domain/lessonAdapter';
+import LessonView from './LessonView';
+
+// Monaco no aporta nada en estas pruebas y es pesado bajo jsdom; se reemplaza por un
+// stub mínimo. La cobertura real del editor/Worker ya vive en runCode.ts y sus specs.
+vi.mock('../sandbox/SandboxEditor', () => ({
+  default: ({ value }: { value: string }) => <textarea data-testid="mock-sandbox-editor" defaultValue={value} readOnly />,
+}));
+
+afterEach(cleanup);
+
+const noop = () => {};
+
+const baseProps = {
+  guidedInput: '',
+  guidedFeedback: null,
+  consoleLogs: [] as string[],
+  sandboxSuccess: false,
+  isSandboxRunning: false,
+  isSpeaking: false,
+  onToggleSpeak: noop,
+  onSetLessonStage: noop,
+  onSetGuidedStepIndex: noop,
+  onSetGuidedInput: noop,
+  onVerifyGuided: noop,
+  onResetSandbox: noop,
+  onSetSandboxCode: noop,
+  onRunCode: noop,
+  onReturnToTimeline: noop,
+};
+
+describe('LessonView — compatibilidad con lecciones v1 adaptadas', () => {
+  const lesson = normalizeLesson(MODULES[0]);
+
+  it('renderiza la etapa "Observar" con las secciones nuevas sin romper', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={lesson}
+        lessonStage="observe"
+        guidedStepIndex={0}
+        sandboxCode={lesson.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getAllByText(lesson.title).length).toBeGreaterThan(0);
+    expect(screen.getByText('¿Qué aprenderé?')).toBeInTheDocument();
+    expect(screen.getByText('Explicación')).toBeInTheDocument();
+  });
+
+  it('conserva las etiquetas de las que depende el flujo e2e existente en la etapa autónoma', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={lesson}
+        lessonStage="solo"
+        guidedStepIndex={0}
+        sandboxCode={lesson.challenge.starterCode}
+        sandboxSuccess
+      />,
+    );
+
+    expect(screen.getByText('Editor de Código JS / Sandbox')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ejecutar Código' })).toBeInTheDocument();
+    expect(screen.getByText(`¡Módulo Superado! Has ganado +${lesson.xpReward} XP.`)).toBeInTheDocument();
+  });
+
+  it('no muestra secciones v2 opcionales cuando el módulo v1 no trae ese dato', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={lesson}
+        lessonStage="observe"
+        guidedStepIndex={0}
+        sandboxCode={lesson.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.queryByText('¿Dónde y cuándo se usa en la práctica?')).not.toBeInTheDocument();
+  });
+});
+
+describe('LessonView — lecciones v2 nativas', () => {
+  const conceptual = normalizeLesson(LESSONS_V2[0]);
+  const guiada = normalizeLesson(LESSONS_V2[1]);
+
+  it('muestra el contexto real de uso cuando la lección v2 lo define', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={conceptual}
+        lessonStage="observe"
+        guidedStepIndex={0}
+        sandboxCode={conceptual.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText('¿Dónde y cuándo se usa en la práctica?')).toBeInTheDocument();
+    expect(screen.getByText('¿Por qué me sirve esto?')).toBeInTheDocument();
+    expect(screen.getByText(conceptual.examples[0].title)).toBeInTheDocument();
+  });
+
+  it('muestra la evidencia esperada del reto en la etapa autónoma', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={conceptual}
+        lessonStage="solo"
+        guidedStepIndex={0}
+        sandboxCode={conceptual.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText(/Evidencia esperada:/)).toBeInTheDocument();
+  });
+
+  it('muestra el contador de pasos cuando la práctica guiada tiene más de un paso', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={guiada}
+        lessonStage="guided"
+        guidedStepIndex={0}
+        sandboxCode={guiada.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText(`Paso 1 de ${guiada.guidedPractice.length}`)).toBeInTheDocument();
+    expect(guiada.guidedPractice.length).toBeGreaterThan(1);
+  });
+
+  it('muestra reflexión y criterios de dominio al superar el reto', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={guiada}
+        lessonStage="solo"
+        guidedStepIndex={0}
+        sandboxCode={guiada.challenge.starterCode}
+        sandboxSuccess
+      />,
+    );
+
+    expect(screen.getByText('Pregunta de reflexión')).toBeInTheDocument();
+    expect(screen.getByText('¿Ya domino esto?')).toBeInTheDocument();
+  });
+});

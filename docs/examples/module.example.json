@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "fundamentos-condicionales-01",
+  "slug": "condicionales-y-comparaciones",
+  "phaseId": "fundamentos",
+  "sequence": 1,
+  "locale": "es-MX",
+  "status": "published",
+  "title": "Condicionales y comparaciones",
+  "category": "Fundamentos",
+  "summary": "Usa una condición para tomar decisiones a partir de un valor.",
+  "estimatedMinutes": 45,
+  "xpReward": 100,
+  "prerequisiteModuleIds": [],
+  "learningObjectives": [
+    "Comparar valores con operadores relacionales",
+    "Elegir una rama con if y else",
+    "Comprobar el comportamiento con casos de ejemplo"
+  ],
+  "lesson": {
+    "conceptMarkdown": "Una condición produce `true` o `false`. `if` ejecuta una rama cuando la condición es verdadera y `else` cubre el caso contrario.",
+    "narrationText": "Una condición permite que el programa elija entre dos caminos. Primero compara un valor y después ejecuta la rama correspondiente.",
+    "steps": [
+      {
+        "id": "observar",
+        "title": "Observa la comparación",
+        "bodyMarkdown": "La expresión `edad >= 18` es verdadera cuando la edad es dieciocho o mayor."
+      },
+      {
+        "id": "predecir",
+        "title": "Predice la rama",
+        "bodyMarkdown": "Antes de ejecutar, decide qué texto debería aparecer para una edad de 15."
+      }
+    ]
+  },
+  "guidedExercise": {
+    "id": "seleccionar-operador",
+    "promptMarkdown": "Selecciona el operador que acepta una calificación de 6 o mayor.",
+    "codeSnippet": "const aprobada = calificacion ___ 6;",
+    "responseType": "singleChoice",
+    "options": [
+      {
+        "id": "gte",
+        "label": ">="
+      },
+      {
+        "id": "gt",
+        "label": ">"
+      },
+      {
+        "id": "eq",
+        "label": "==="
+      }
+    ],
+    "evaluation": {
+      "type": "optionEquals",
+      "expectedOptionId": "gte"
+    },
+    "feedback": {
+      "correctMarkdown": "Correcto. `>=` incluye el valor límite.",
+      "retryMarkdown": "Revisa si el operador elegido incluye también el número 6."
+    }
+  },
+  "sandbox": {
+    "language": "javascript",
+    "timeoutMs": 2000,
+    "starterCode": "function evaluarEdad(edad) {\n  // Devuelve \"Mayor de edad\" o \"Menor de edad\".\n}\n\nconsole.log(evaluarEdad(20));\nconsole.log(evaluarEdad(15));",
+    "checks": [
+      {
+        "id": "adulto",
+        "type": "stdoutIncludes",
+        "value": "Mayor de edad",
+        "failureMessage": "La salida todavía no identifica el caso de una persona adulta."
+      },
+      {
+        "id": "menor",
+        "type": "stdoutIncludes",
+        "value": "Menor de edad",
+        "failureMessage": "La salida todavía no identifica el caso de una persona menor."
+      }
+    ]
+  },
+  "mentor": {
+    "enabled": true,
+    "allowedConcepts": [
+      "operadores relacionales",
+      "if",
+      "else",
+      "return"
+    ],
+    "hintPolicy": "socratic-no-solution"
+  }
+}
