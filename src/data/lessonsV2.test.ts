@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { LESSONS_V2 } from './lessonsV2';
 
 describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
-  it('define las 6 lecciones piloto (3 fundamentos + 3 JS moderno/async)', () => {
-    expect(LESSONS_V2).toHaveLength(6);
+  it('define las 9 lecciones piloto (3 fundamentos + 3 JS moderno/async + 3 Git/Conventional Commits)', () => {
+    expect(LESSONS_V2).toHaveLength(9);
   });
 
-  it('tiene ids únicos y orden secuencial 1 a 6', () => {
+  it('tiene ids únicos y orden secuencial 1 a 9', () => {
     const ids = LESSONS_V2.map((lesson) => lesson.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
   it('cada lección declara schemaVersion 2 y los campos mínimos del contrato', () => {
@@ -95,5 +95,36 @@ describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
     const checkLabels = asyncAwait?.challenge.checks.map((check) => check.label) ?? [];
     expect(checkLabels.some((label) => label.includes('cargado'))).toBe(true);
     expect(checkLabels.some((label) => label.toLowerCase().includes('error'))).toBe(true);
+  });
+
+  it('las 3 lecciones de Git/Conventional Commits encadenan sus prerrequisitos en orden (7 -> 8 -> 9), continuando desde JS async', () => {
+    const asyncAwait = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-js-async-await');
+    const stagingCommit = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-git-staging-commit');
+    const ramas = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-git-ramas');
+    const conventionalCommits = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-conventional-commits');
+
+    expect(stagingCommit?.prerequisiteLessonIds).toEqual([asyncAwait?.id]);
+    expect(ramas?.prerequisiteLessonIds).toEqual([stagingCommit?.id]);
+    expect(conventionalCommits?.prerequisiteLessonIds).toEqual([ramas?.id]);
+  });
+
+  it('la lección de staging/commit distingue commitear staging vacío de commitear con archivos', () => {
+    const stagingCommit = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-git-staging-commit');
+    expect(stagingCommit?.challenge.starterCode).toContain('archivosEnStaging');
+    expect(stagingCommit?.challenge.checks.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('la lección de ramas distingue crear una rama nueva de un intento de rama duplicada', () => {
+    const ramas = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-git-ramas');
+    const checkLabels = ramas?.challenge.checks.map((check) => check.label) ?? [];
+    expect(checkLabels.some((label) => label.toLowerCase().includes('nueva'))).toBe(true);
+    expect(checkLabels.some((label) => label.toLowerCase().includes('duplicada'))).toBe(true);
+  });
+
+  it('la lección de Conventional Commits valida el tipo de commit contra una lista de tipos permitidos', () => {
+    const conventionalCommits = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-conventional-commits');
+    expect(conventionalCommits?.challenge.starterCode).toContain('tiposValidos');
+    const checkLabels = conventionalCommits?.challenge.checks.map((check) => check.label) ?? [];
+    expect(checkLabels.some((label) => label.toLowerCase().includes('inválido'))).toBe(true);
   });
 });

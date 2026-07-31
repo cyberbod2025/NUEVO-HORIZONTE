@@ -57,6 +57,16 @@ Tras validar el contrato y el piloto de 3 lecciones, se migró el territorio del
 
 `prerequisiteLessonIds` encadena 4→5→6 y 3→4, manteniendo la progresión Comprender→Aplicar→Resolver también entre lecciones de distintos temas. El módulo 2 legacy en `curriculum.ts` sigue sin tocarse. Verificación repetida completa (`tsc`, `vitest --coverage`, `build`, `audit`) en verde; ver el reporte de esta iteración para el detalle exacto de comandos y resultados.
 
+## Update — seguimiento (módulo 3)
+
+Se migró el territorio del módulo 3 legacy (Terminal, Git & Conventional Commits) a 3 lecciones v2 más, mismo archivo `src/data/lessonsV2.ts`, sin cambios de código en `LessonView`/`TimelineView`/`lessonAdapter.ts`:
+
+7. `lesson-v2-git-staging-commit` — las tres zonas de Git (directorio de trabajo, staging area, repositorio), `git add` vs. `git commit` (4 pasos guiados).
+8. `lesson-v2-git-ramas` — ramas, `git checkout -b`, `git merge` y conflictos de merge (4 pasos guiados).
+9. `lesson-v2-conventional-commits` — estándar `tipo(alcance): descripción`, validación del tipo contra una lista permitida (4 pasos guiados).
+
+Como el sandbox del contrato v2 solo ejecuta JavaScript (no un shell real), los retos finales de estas 3 lecciones son simulaciones en JS del comportamiento de Git (`simularCommit`, `crearRama`, `formatearCommit`) en vez de comandos reales, siguiendo el mismo patrón que ya usaba el sandbox del módulo 3 legacy en `curriculum.ts` (`formatearCommit`). `prerequisiteLessonIds` encadena 7→8→9, y la lección 7 depende de `lesson-v2-js-async-await` (lección 6), manteniendo una sola cadena de desbloqueo secuencial a lo largo de las 9 lecciones piloto. El módulo 3 legacy en `curriculum.ts` sigue sin tocarse. Verificación repetida completa (`tsc --noEmit`, `vitest run --coverage`, `npm run build`, `npm audit`) en verde: 46 pruebas (antes 40), `lessonsV2.ts` sigue al 100% de cobertura, 0 vulnerabilidades.
+
 ## Alternatives considered
 
 - Migrar los 12 módulos completos al contrato v2 de una vez: rechazado para esta iteración por alcance explícito (riesgo alto, sin validación previa del contrato con contenido real).

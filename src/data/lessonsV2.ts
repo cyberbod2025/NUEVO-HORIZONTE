@@ -1,4 +1,4 @@
-import { Braces, Brain, Code, Globe, Sliders, Zap } from 'lucide-react';
+import { Braces, Brain, Code, GitBranch, GitCommit, Globe, Sliders, Terminal, Zap } from 'lucide-react';
 import type { LessonV2 } from '../types/lesson';
 
 /**
@@ -7,9 +7,11 @@ import type { LessonV2 } from '../types/lesson';
  * Lecciones reales, no de relleno, que demuestran la progresión
  * Comprender -> Aplicar -> Resolver de manera autónoma. Las 3 primeras cubren
  * variables/condicionales/funciones (territorio del módulo 1 legacy); las 3
- * siguientes (agregadas en la microtarea de seguimiento) cubren JS moderno y
- * asincronía (territorio del módulo 2 legacy: arrow functions, destructuring,
- * template literals, promesas, async/await y fetch). No sustituyen `MODULES`;
+ * siguientes cubren JS moderno y asincronía (territorio del módulo 2 legacy:
+ * arrow functions, destructuring, template literals, promesas, async/await y
+ * fetch); las 3 últimas (agregadas en esta microtarea) cubren terminal, Git y
+ * Conventional Commits (territorio del módulo 3 legacy: staging area y commit,
+ * ramas, y el estándar de mensajes de commit). No sustituyen `MODULES`;
  * conviven con él mientras se valida el contrato antes de migrar el resto del
  * currículo.
  */
@@ -728,6 +730,418 @@ export const LESSONS_V2: LessonV2[] = [
       'Uso try/catch para manejar errores dentro de una función async.',
       'Explico por qué fetch() necesita dos await seguidos (respuesta y luego .json()).',
       'Escribí una función async completa que maneja tanto el caso de éxito como el de error.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-git-staging-commit',
+    moduleId: 'mod-3-v2',
+    phaseId: 'fase-1',
+    order: 7,
+    title: 'V2.7 Git: directorio de trabajo, staging area y tu primer commit',
+    category: 'Herramientas',
+    summary: 'Entiende las tres zonas de Git y por qué un commit solo guarda lo que pasó por git add.',
+    prerequisiteLessonIds: ['lesson-v2-js-async-await'],
+    estimatedMinutes: 40,
+    xpReward: 90,
+    icon: Terminal,
+    color: 'from-slate-600 to-slate-900',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar las tres zonas de Git: directorio de trabajo, staging area y repositorio (historial de commits).',
+      'Distinguir qué hace `git add` (mover cambios al staging area) de qué hace `git commit` (guardar un snapshot permanente de lo que está en staging).',
+      'Predecir qué archivos quedan incluidos en un commit cuando solo se agregó una parte de los cambios.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Git organiza tu proyecto en tres zonas. El **directorio de trabajo** son los archivos tal como los ves y editas ahora mismo. El **staging area** (o "índice") es una zona intermedia donde marcas exactamente qué cambios quieres incluir en el próximo commit, usando `git add <archivo>`. El **repositorio** es el historial permanente: `git commit -m "mensaje"` toma una fotografía (snapshot) de lo que está en staging en ese momento, no de todo el directorio de trabajo.',
+      whyItMattersMarkdown:
+        'Si no entiendes estas tres zonas, vas a tener commits que "no traen" cambios que sí hiciste (porque olvidaste el `git add`), o vas a incluir por accidente archivos que no querías compartir todavía. Separar edición de "qué se va a guardar" es lo que te permite hacer commits pequeños y precisos en vez de un solo commit gigante y confuso.',
+      realWorldContextMarkdown:
+        'En un proyecto como SASE, mientras trabajas en el módulo de calificaciones puedes tener modificados 5 archivos, pero solo 2 están listos para compartir con el equipo. `git add` te deja elegir esos 2 y dejar los otros 3 en el directorio de trabajo para seguir editándolos sin que aparezcan en el commit de hoy.',
+      narrationText:
+        'Git tiene tres zonas: directorio de trabajo, staging area y repositorio. Git add mueve cambios a staging. Git commit guarda permanentemente solo lo que está en staging, no todo lo que editaste.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-flujo-basico',
+        title: 'El flujo básico: editar, agregar, commitear',
+        code: '# 1. Editas notas.js (directorio de trabajo)\n# 2. Lo marcas para el próximo commit\ngit add notas.js\n# 3. Guardas un snapshot permanente de lo que está en staging\ngit commit -m "feat: agregar calculo de promedio"',
+        explanationMarkdown:
+          'Cada paso mueve el cambio a la siguiente zona: primero existe solo en tu editor, luego se marca en staging, y solo hasta el `commit` queda guardado en el historial de Git.',
+      },
+      {
+        id: 'ejemplo-add-parcial',
+        title: 'Agregar solo una parte de los cambios',
+        code: '# Modificaste notas.js Y alumnos.js, pero solo notas.js está listo\ngit add notas.js\ngit commit -m "feat: agregar validacion de notas"\n# alumnos.js sigue modificado, pero NO entró a este commit',
+        explanationMarkdown:
+          'El commit resultante solo contiene `notas.js`. `alumnos.js` sigue existiendo con tus cambios en el directorio de trabajo, listo para agregarse en un commit posterior.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué comando mueve cambios del directorio de trabajo al staging area?',
+        codeSnippet: 'git ____ notas.js',
+        options: ['add', 'commit', 'push', 'status'],
+        correctAnswer: 'add',
+        hints: ['"add" en inglés significa "agregar": agrega el cambio a la zona de staging.'],
+        explanationMarkdown: '`git add <archivo>` marca ese archivo para que se incluya en el próximo commit.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown:
+          'Modificaste 3 archivos, pero solo ejecutaste `git add archivo1.js` antes de hacer `git commit -m "..."`. ¿Cuántos archivos quedan incluidos en ese commit?',
+        options: ['1', '2', '3', '0'],
+        correctAnswer: '1',
+        hints: ['`git commit` solo guarda lo que está en staging, no todo el directorio de trabajo.'],
+        explanationMarkdown:
+          'Solo `archivo1.js` pasó por `git add`, así que es el único que queda en el snapshot del commit. Los otros dos siguen modificados, esperando su propio `git add`.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: '¿Qué comando te muestra qué archivos están modificados, cuáles están en staging y cuáles Git no está siguiendo todavía?',
+        options: ['git status', 'git log', 'git diff', 'git branch'],
+        correctAnswer: 'git status',
+        hints: ['Es el comando que más vas a usar para "orientarte" antes de hacer commit.'],
+        explanationMarkdown: '`git status` resume el estado actual de las tres zonas para ese repositorio.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown:
+          'Ejecutas `git commit -m "feat: nueva funcion"` sin haber corrido `git add` para tus cambios más recientes. ¿Qué pasa?',
+        options: [
+          'El commit no incluye esos cambios nuevos, porque nunca llegaron al staging area',
+          'Git agrega automáticamente todos los cambios modificados',
+          'El comando falla con un error de sintaxis',
+          'No pasa nada distinto, el resultado es igual',
+        ],
+        correctAnswer: 'El commit no incluye esos cambios nuevos, porque nunca llegaron al staging area',
+        hints: ['`git commit` solo toma una fotografía de lo que ya está en staging, nunca del directorio de trabajo directamente.'],
+        explanationMarkdown:
+          'Sin `git add`, esos cambios simplemente no forman parte del commit; siguen como modificaciones pendientes en el directorio de trabajo hasta que se agreguen explícitamente.',
+      },
+    ],
+    challenge: {
+      id: 'reto-git-staging-commit',
+      promptMarkdown:
+        'Completa `simularCommit(archivosEnStaging, mensaje)`: si el staging area está vacío, avisa que no hay nada que commitear; si tiene archivos, confirma el commit con el mensaje y el número de archivos incluidos.',
+      starterCode:
+        'function simularCommit(archivosEnStaging, mensaje) {\n  // Si no hay archivos en staging, retorna: "Nada que commitear: el staging area está vacío."\n  // Si hay archivos, retorna: "Commit realizado: <mensaje> (<N> archivo(s))" usando el mensaje real y el numero de archivos\n  return "";\n}\n\nconsole.log(simularCommit(["notas.js", "alumnos.js"], "feat: agregar modulo de notas"));\nconsole.log(simularCommit([], "feat: intento sin agregar nada"));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        {
+          id: 'check-commit-exitoso',
+          type: 'stdoutIncludes',
+          label: 'Commit con 2 archivos en staging',
+          value: 'Commit realizado: "feat: agregar modulo de notas" (2 archivo(s))',
+          failureMessage: 'Con 2 archivos en staging, el commit debe confirmarse mostrando el mensaje y el número exacto de archivos.',
+        },
+        {
+          id: 'check-staging-vacio',
+          type: 'stdoutIncludes',
+          label: 'Staging vacío -> nada que commitear',
+          value: 'Nada que commitear: el staging area está vacío.',
+          failureMessage: 'Con el staging area vacío, no debe generarse un commit; hay que avisar que no hay nada que guardar.',
+        },
+      ],
+      hints: [
+        'Usa archivosEnStaging.length para decidir cuál de los dos mensajes mostrar.',
+        'Construye el mensaje de éxito con un template literal: `Commit realizado: "${mensaje}" (${archivosEnStaging.length} archivo(s))`.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar el commit exitoso con 2 archivos y el mensaje exacto, y luego el aviso de staging vacío.',
+    },
+    reflectionPromptMarkdown:
+      '¿Alguna vez perdiste (o casi pierdes) trabajo por no tener un sistema de versiones? Describe qué pasó o qué habría cambiado si hubieras tenido Git.',
+    masteryCriteria: [
+      'Explico las tres zonas de Git con mis propias palabras.',
+      'Distingo qué hace git add de qué hace git commit.',
+      'Predigo qué archivos quedan incluidos en un commit cuando solo se agregó una parte de los cambios.',
+      'Escribí una función que refleja correctamente el comportamiento de commitear staging vacío vs. con archivos.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-git-ramas',
+    moduleId: 'mod-3-v2',
+    phaseId: 'fase-1',
+    order: 8,
+    title: 'V2.8 Ramas: trabajar en paralelo sin romper main',
+    category: 'Herramientas',
+    summary: 'Crea ramas para aislar trabajo en progreso y entiende qué pasa cuando dos ramas chocan al hacer merge.',
+    prerequisiteLessonIds: ['lesson-v2-git-staging-commit'],
+    estimatedMinutes: 45,
+    xpReward: 100,
+    icon: GitBranch,
+    color: 'from-slate-500 to-zinc-800',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar qué es una rama y por qué aísla el trabajo en progreso del código estable en main.',
+      'Usar `git checkout -b <rama>` para crear una rama nueva y cambiarte a ella.',
+      'Predecir cuándo un merge entre dos ramas genera un conflicto que hay que resolver manualmente.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Una rama es una línea de trabajo independiente que parte de un punto del historial. `main` normalmente contiene el código estable; cuando empiezas una funcionalidad nueva, creas una rama (`git checkout -b feature-x`) para experimentar sin afectar `main`. Cuando la funcionalidad está lista, se junta de vuelta con `git merge feature-x` (estando parado en `main`).',
+      whyItMattersMarkdown:
+        'Sin ramas, cualquier cambio a medio terminar vive directamente en el código que todos usan, y un error rompe el proyecto para todo el equipo. Las ramas permiten que varias personas (o tú mismo, en varias tareas) trabajen en paralelo sin pisarse, y que `main` siempre se mantenga en un estado que funciona.',
+      realWorldContextMarkdown:
+        'En SASE, una persona podría trabajar en `feature-calificaciones` mientras otra corrige un bug urgente directamente sobre `main`. Ninguna de las dos ve el trabajo a medias de la otra hasta que hacen merge, así que el bug se puede arreglar y desplegar sin esperar a que la funcionalidad nueva esté terminada.',
+      narrationText:
+        'Una rama es una línea de trabajo independiente. Creas una rama para aislar una funcionalidad, y la juntas de vuelta a main con merge cuando está lista. Si dos ramas cambiaron la misma línea, Git marca un conflicto.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-crear-rama',
+        title: 'Crear una rama y volver a main',
+        code: 'git checkout -b feature-calificaciones\n# ... trabajas y haces commits en esta rama ...\ngit checkout main\ngit merge feature-calificaciones',
+        explanationMarkdown:
+          '`checkout -b` crea la rama Y te cambia a ella en un solo paso. Los commits que hagas ahí no aparecen en `main` hasta que regreses a `main` y ejecutes `merge`.',
+      },
+      {
+        id: 'ejemplo-conflicto',
+        title: 'Cuándo aparece un conflicto de merge',
+        code: '# Rama A cambió la línea 10 de notas.js\n# Rama B TAMBIÉN cambió la línea 10 de notas.js, de otra forma\ngit merge rama-b\n# CONFLICT (content): Merge conflict in notas.js',
+        explanationMarkdown:
+          'Git no puede decidir por sí solo cuál de las dos versiones de la línea 10 es la correcta, así que detiene el merge y te pide resolver el conflicto a mano.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué comando crea una rama nueva Y te cambia a ella en un solo paso?',
+        codeSnippet: 'git ______ feature-calificaciones',
+        options: ['checkout -b', 'branch', 'merge', 'commit -b'],
+        correctAnswer: 'checkout -b',
+        hints: ['`git branch <nombre>` solo crea la rama, pero no te mueve a ella.'],
+        explanationMarkdown: '`git checkout -b <rama>` combina crear la rama y cambiarte a ella en un solo comando.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown:
+          'Dos desarrolladores trabajan en ramas distintas (`feature-a` y `feature-b`) partiendo de `main`. Mientras ninguno hace merge, ¿los cambios de uno afectan al trabajo del otro?',
+        options: [
+          'No, cada rama es independiente hasta que alguien hace merge',
+          'Sí, los cambios se sincronizan automáticamente entre ramas',
+          'Solo si ambos modifican el mismo archivo',
+          'Depende de si usan la misma computadora',
+        ],
+        correctAnswer: 'No, cada rama es independiente hasta que alguien hace merge',
+        hints: ['Ese aislamiento es exactamente el propósito de las ramas.'],
+        explanationMarkdown:
+          'Cada rama tiene su propio historial de commits hasta que explícitamente se junta con otra mediante `merge`.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'Estando parado en `main`, ¿qué comando junta de vuelta los cambios de la rama `feature-calificaciones`?',
+        codeSnippet: 'git ______ feature-calificaciones',
+        options: ['merge', 'add', 'branch', 'commit'],
+        correctAnswer: 'merge',
+        hints: ['Debes estar en la rama DESTINO (main) antes de ejecutar este comando.'],
+        explanationMarkdown: '`git merge feature-calificaciones` incorpora los commits de esa rama al historial de la rama actual (`main`).',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: '¿Qué pasa si dos ramas modificaron la MISMA línea del mismo archivo y luego intentas hacer merge?',
+        options: [
+          'Git marca un conflicto de merge y te pide resolver manualmente qué versión dejar',
+          'Git elige automáticamente los cambios de la rama más reciente',
+          'El merge falla por completo y borra los cambios de ambas ramas',
+          'No pasa nada: Git combina ambas versiones de la línea automáticamente',
+        ],
+        correctAnswer: 'Git marca un conflicto de merge y te pide resolver manualmente qué versión dejar',
+        hints: ['Git es bueno combinando cambios en LÍNEAS DISTINTAS, no en la misma línea.'],
+        explanationMarkdown:
+          'Cuando el mismo lugar del archivo cambió en ambas ramas, Git no puede decidir cuál versión es correcta: detiene el merge, marca el conflicto en el archivo, y espera que la persona lo resuelva a mano.',
+      },
+    ],
+    challenge: {
+      id: 'reto-git-ramas',
+      promptMarkdown:
+        'Completa `crearRama(ramasExistentes, nuevaRama)`: si la rama ya existe, retorna un error; si no existe, confirma que se creó y que te cambiaste a ella.',
+      starterCode:
+        'function crearRama(ramasExistentes, nuevaRama) {\n  // Si nuevaRama ya esta en ramasExistentes, retorna: "Error: la rama <nuevaRama> ya existe."\n  // Si no esta, retorna: "Rama <nuevaRama> creada. Cambiaste a la nueva rama."\n  return "";\n}\n\nconsole.log(crearRama(["main"], "feature-calificaciones"));\nconsole.log(crearRama(["main", "feature-calificaciones"], "feature-calificaciones"));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        {
+          id: 'check-rama-nueva',
+          type: 'stdoutIncludes',
+          label: 'Rama nueva creada con éxito',
+          value: 'Rama "feature-calificaciones" creada. Cambiaste a la nueva rama.',
+          failureMessage: 'Cuando la rama no existe todavía, debe confirmarse su creación con el nombre exacto entre comillas.',
+        },
+        {
+          id: 'check-rama-duplicada',
+          type: 'stdoutIncludes',
+          label: 'Rama duplicada -> error',
+          value: 'Error: la rama "feature-calificaciones" ya existe.',
+          failureMessage: 'Cuando la rama ya está en la lista de ramas existentes, debe rechazarse con un mensaje de error, no crearse de nuevo.',
+        },
+      ],
+      hints: [
+        'Usa ramasExistentes.includes(nuevaRama) para revisar si ya existe.',
+        'Construye cada mensaje con un template literal que incluya el nombre real de la rama entre comillas dobles.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar primero la confirmación de creación de "feature-calificaciones", y luego el error al intentar crearla de nuevo.',
+    },
+    reflectionPromptMarkdown:
+      'Si trabajaras en equipo sin ramas (todos commiteando directo a main), ¿qué problema concreto crees que aparecería primero?',
+    masteryCriteria: [
+      'Explico qué es una rama y por qué aísla trabajo en progreso.',
+      'Sé qué comando crea una rama y cambia a ella en un solo paso.',
+      'Predigo cuándo un merge entre ramas genera un conflicto que hay que resolver a mano.',
+      'Escribí una función que distingue correctamente crear una rama nueva de un intento de rama duplicada.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-conventional-commits',
+    moduleId: 'mod-3-v2',
+    phaseId: 'fase-1',
+    order: 9,
+    title: 'V2.9 Conventional Commits: mensajes de commit que cuentan una historia',
+    category: 'Herramientas',
+    summary: 'Usa el estándar tipo(alcance): descripción para que el historial de commits sea legible y automatizable.',
+    prerequisiteLessonIds: ['lesson-v2-git-ramas'],
+    estimatedMinutes: 40,
+    xpReward: 90,
+    icon: GitCommit,
+    color: 'from-zinc-600 to-neutral-900',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Elegir el prefijo correcto (feat, fix, docs, chore, refactor) según el tipo de cambio realizado.',
+      'Escribir un mensaje de commit con el formato `tipo(alcance): descripción`.',
+      'Detectar cuándo un mensaje de commit es demasiado vago para saber qué cambió sin abrir el diff.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Conventional Commits es un estándar para escribir mensajes de commit con formato `tipo(alcance): descripción`. El `tipo` dice QUÉ CLASE de cambio es (`feat` = funcionalidad nueva, `fix` = corrección de bug, `docs` = documentación, `chore` = tareas de mantenimiento, `refactor` = reordenar código sin cambiar su comportamiento). El `alcance` (opcional, entre paréntesis) dice EN QUÉ PARTE del proyecto ocurrió. La `descripción` es una frase corta en presente que explica el cambio.',
+      whyItMattersMarkdown:
+        'Un historial de commits con mensajes como "cambios", "arreglos", "asdf" es inútil seis meses después: nadie puede saber qué se hizo sin abrir cada commit uno por uno. Un historial con Conventional Commits se puede leer como una bitácora, e incluso generar automáticamente un changelog o decidir la siguiente versión del software.',
+      realWorldContextMarkdown:
+        'Los pipelines de CI/CD (Módulo 10) y las herramientas de release automático leen el prefijo (`feat`, `fix`, etc.) de cada commit para decidir si el próximo lanzamiento es una versión menor, un parche, o si necesita mencionarse en las notas de la versión.',
+      narrationText:
+        'Conventional Commits usa el formato tipo, entre paréntesis el alcance opcional, dos puntos y la descripción. El tipo dice qué clase de cambio es: funcionalidad nueva, corrección, documentación, mantenimiento o refactor.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-feat',
+        title: 'Un commit de funcionalidad nueva',
+        code: 'git commit -m "feat(sase-notas): permitir registro de calificaciones"',
+        explanationMarkdown:
+          '`feat` indica que se agregó algo nuevo que el usuario puede usar; `(sase-notas)` acota el cambio a ese módulo del proyecto.',
+      },
+      {
+        id: 'ejemplo-vago',
+        title: 'Un mensaje que Conventional Commits NO aceptaría',
+        code: 'git commit -m "arreglos varios"',
+        explanationMarkdown:
+          'No tiene tipo (¿fue un fix? ¿un feat?) ni describe qué se arregló específicamente. Seis meses después, este mensaje no le sirve a nadie del equipo.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué prefijo usarías para AGREGAR una funcionalidad nueva al sistema?',
+        codeSnippet: 'git commit -m "____: agregar modulo de autenticacion"',
+        options: ['feat', 'fix', 'chore', 'docs'],
+        correctAnswer: 'feat',
+        hints: ['"feat" viene de "feature" (funcionalidad).'],
+        explanationMarkdown: '`feat` se usa cuando el commit introduce una capacidad nueva para quien usa el software.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué prefijo usarías para CORREGIR un bug que ya estaba reportado?',
+        options: ['fix', 'feat', 'refactor', 'docs'],
+        correctAnswer: 'fix',
+        hints: ['"fix" significa "arreglar" o "corregir".'],
+        explanationMarkdown: '`fix` marca un commit que corrige un comportamiento incorrecto existente, no que agrega algo nuevo.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: '¿Cuál es el formato correcto de un mensaje Conventional Commits con alcance?',
+        options: [
+          'tipo(alcance): descripción',
+          'alcance(tipo): descripción',
+          'descripción: tipo(alcance)',
+          'tipo - alcance - descripción',
+        ],
+        correctAnswer: 'tipo(alcance): descripción',
+        hints: ['El alcance va entre paréntesis, justo después del tipo, y antes de los dos puntos.'],
+        explanationMarkdown: 'El orden fijo es tipo, alcance opcional entre paréntesis, dos puntos, y luego la descripción.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: 'Un compañero hizo `git commit -m "arreglos varios"`. ¿Qué problema tiene ese mensaje según Conventional Commits?',
+        options: [
+          'No usa ningún prefijo de tipo (feat/fix/etc.) y la descripción es demasiado vaga para saber qué cambió',
+          'El mensaje es demasiado largo',
+          'Le falta obligatoriamente el alcance entre paréntesis',
+          'No tiene ningún problema',
+        ],
+        correctAnswer: 'No usa ningún prefijo de tipo (feat/fix/etc.) y la descripción es demasiado vaga para saber qué cambió',
+        hints: ['El alcance es opcional, pero el tipo y una descripción clara no lo son.'],
+        explanationMarkdown:
+          'Sin tipo ni descripción específica, nadie puede saber si fue un feat, un fix, o qué parte del proyecto cambió sin abrir el commit completo.',
+      },
+    ],
+    challenge: {
+      id: 'reto-conventional-commits',
+      promptMarkdown:
+        'Completa `formatearCommit(tipo, alcance, descripcion)`: si el tipo no está en la lista de tipos válidos, retorna un error; si es válido, arma el mensaje con el formato tipo(alcance): descripción.',
+      starterCode:
+        'function formatearCommit(tipo, alcance, descripcion) {\n  const tiposValidos = ["feat", "fix", "docs", "chore", "refactor"];\n  // Si tipo no esta en tiposValidos, retorna: "Error: tipo de commit invalido: <tipo>"\n  // Si es valido, retorna el mensaje con el formato: tipo(alcance): descripcion\n  return "";\n}\n\nconsole.log(formatearCommit("feat", "sase-notas", "permitir registro de calificaciones"));\nconsole.log(formatearCommit("hotfix", "sase-notas", "corregir bug urgente"));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        {
+          id: 'check-tipo-valido',
+          type: 'stdoutIncludes',
+          label: 'feat(sase-notas): permitir registro de calificaciones',
+          value: 'feat(sase-notas): permitir registro de calificaciones',
+          failureMessage: 'Con un tipo válido, el mensaje debe armarse exactamente como tipo(alcance): descripcion.',
+        },
+        {
+          id: 'check-tipo-invalido',
+          type: 'stdoutIncludes',
+          label: 'Tipo inválido -> error',
+          value: 'Error: tipo de commit inválido: "hotfix"',
+          failureMessage: '"hotfix" no está en la lista de tipos válidos: debe rechazarse con un mensaje de error, no formatearse como si fuera correcto.',
+        },
+      ],
+      hints: [
+        'Usa tiposValidos.includes(tipo) para validar antes de armar el mensaje.',
+        'Para el caso válido, usa un template literal: `${tipo}(${alcance}): ${descripcion}`.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar el commit válido formateado correctamente, y luego el error para el tipo "hotfix".',
+    },
+    reflectionPromptMarkdown:
+      'Revisa (mentalmente o de verdad) el último mensaje de commit que escribiste alguna vez, o uno que hayas visto. ¿Cumpliría el estándar Conventional Commits? ¿Cómo lo reescribirías?',
+    masteryCriteria: [
+      'Elijo el prefijo correcto (feat/fix/docs/chore/refactor) según el tipo de cambio.',
+      'Escribo un mensaje de commit con el formato tipo(alcance): descripción.',
+      'Detecto cuándo un mensaje de commit es demasiado vago para ser útil.',
+      'Escribí una función que valida el tipo de commit contra una lista de tipos permitidos antes de formatear el mensaje.',
     ],
   },
 ];

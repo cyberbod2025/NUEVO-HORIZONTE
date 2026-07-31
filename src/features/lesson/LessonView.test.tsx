@@ -170,3 +170,40 @@ describe('LessonView — migración de seguimiento (JS moderno/async)', () => {
     expect(arrowDestructuring.guidedPractice).toHaveLength(4);
   });
 });
+
+describe('LessonView — migración de seguimiento (Git y Conventional Commits)', () => {
+  const ramas = normalizeLesson(LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-git-ramas')!);
+
+  it('renderiza la lección de ramas con sus 4 pasos guiados', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={ramas}
+        lessonStage="guided"
+        guidedStepIndex={0}
+        sandboxCode={ramas.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText(`Paso 1 de ${ramas.guidedPractice.length}`)).toBeInTheDocument();
+    expect(ramas.guidedPractice).toHaveLength(4);
+  });
+
+  it('muestra el reto y la evidencia esperada de la lección de Conventional Commits', () => {
+    const conventionalCommits = normalizeLesson(
+      LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-conventional-commits')!,
+    );
+
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={conventionalCommits}
+        lessonStage="solo"
+        guidedStepIndex={0}
+        sandboxCode={conventionalCommits.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText(/Evidencia esperada:/)).toBeInTheDocument();
+  });
+});
