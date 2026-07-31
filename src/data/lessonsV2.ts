@@ -1,4 +1,4 @@
-import { Boxes, Braces, Brain, Code, FileCode, GitBranch, GitCommit, Globe, Puzzle, Sliders, Terminal, Zap } from 'lucide-react';
+import { ArrowUp, Boxes, Braces, Brain, Code, FileCode, GitBranch, GitCommit, Globe, Layers, Puzzle, RefreshCw, Sliders, Terminal, Zap } from 'lucide-react';
 import type { LessonV2 } from '../types/lesson';
 
 /**
@@ -1578,6 +1578,370 @@ export const LESSONS_V2: LessonV2[] = [
       'Explico qué problema resuelve un genérico frente a usar any.',
       'Predigo el tipo de retorno de una función genérica según el argumento recibido.',
       'Escribí una función que se comporta de forma genérica: funciona igual de bien con distintos tipos de datos sin perder su lógica.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-react-props',
+    moduleId: 'mod-5-v2',
+    phaseId: 'fase-2',
+    order: 13,
+    title: 'V2.13 Componentes y props: pasar datos hacia abajo',
+    category: 'Frontend',
+    summary: 'Entiende cómo fluyen los datos de un componente padre a sus hijos mediante props de solo lectura.',
+    prerequisiteLessonIds: ['lesson-v2-ts-funciones-genericos'],
+    estimatedMinutes: 45,
+    xpReward: 100,
+    icon: Layers,
+    color: 'from-cyan-400 to-blue-500',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar qué es un componente y por qué recibe datos mediante "props" en vez de variables globales.',
+      'Leer un árbol de componentes y predecir qué props recibe cada uno.',
+      'Distinguir cuándo un dato debe ser prop (viene de afuera) y cuándo debe ser estado interno.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Un componente de React es una función que recibe un objeto de entrada llamado `props` y retorna qué se debe mostrar. `props` son de solo lectura: el componente que las recibe nunca las modifica directamente, solo las usa. Los datos fluyen en una sola dirección: de un componente "padre" hacia sus componentes "hijos", igual que un director le pasa una instrucción a un coordinador, y el coordinador a un maestro: la instrucción fluye hacia abajo, no al revés.',
+      whyItMattersMarkdown:
+        'Todo lo que construyas en React (una tarjeta de alumno, una fila de tabla, un botón reutilizable) es un componente que recibe props. Si no entiendes el flujo de props, no puedes depurar por qué un dato "no llega" a donde lo necesitas: el bug más común de quien empieza con React.',
+      realWorldContextMarkdown:
+        'En una tabla de calificaciones de SASE, el componente `TablaAlumnos` no conoce los datos de cada alumno de antemano: los recibe como props desde un componente padre que sí los tiene (por ejemplo, después de consultarlos con fetch, como en la lección de async/await). Cada fila (`FilaAlumno`) recibe solo los datos de UN alumno vía props, no la lista completa.',
+      narrationText:
+        'Un componente recibe props de su padre y las usa de solo lectura. Los datos fluyen hacia abajo en el árbol de componentes, nunca al revés.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-props-basico',
+        title: 'Un componente que recibe props',
+        code: 'function TarjetaAlumno(props) {\n  return `Tarjeta de: ${props.nombre} (${props.calificacion})`;\n}\nconsole.log(TarjetaAlumno({ nombre: "Iker", calificacion: 8 }));',
+        explanationMarkdown:
+          '`props` es un objeto normal. `props.nombre` y `props.calificacion` vienen de lo que le pasaron al llamar la función. Aquí simulamos con `console.log` lo que React haría al renderizar.',
+      },
+      {
+        id: 'ejemplo-props-destructuring',
+        title: 'Props con destructuring (el patrón que verás casi siempre)',
+        code: 'function TarjetaAlumno({ nombre, calificacion }) {\n  return `Tarjeta de: ${nombre} (${calificacion})`;\n}\nconsole.log(TarjetaAlumno({ nombre: "Iker", calificacion: 8 }));',
+        explanationMarkdown:
+          'Es el mismo componente, pero usando el destructuring de la lección V2.4: extrae `nombre` y `calificacion` directamente del objeto props en la firma de la función.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué imprime este código?',
+        codeSnippet: 'function Saludo({ nombre }) {\n  return `Hola, ${nombre}`;\n}\nconsole.log(Saludo({ nombre: "Camila" }));',
+        options: ['Hola, Camila', 'Hola, undefined', 'Hola, nombre', 'Error'],
+        correctAnswer: 'Hola, Camila',
+        hints: ['El destructuring extrae la propiedad nombre del objeto que se pasó.'],
+        explanationMarkdown: '`{ nombre }` extrae la propiedad `nombre` del objeto recibido, que aquí es "Camila".',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué debería pasar si un componente intenta modificar sus props directamente, así: `props.nombre = "Otro";`?',
+        options: [
+          'Nada debería modificar props directamente; React las trata como solo lectura',
+          'Cambia el valor y React lo re-renderiza automáticamente',
+          'Lanza un error de sintaxis',
+          'Convierte el componente en useState',
+        ],
+        correctAnswer: 'Nada debería modificar props directamente; React las trata como solo lectura',
+        hints: ['Props fluyen de padre a hijo; el hijo no debe reescribirlas.'],
+        explanationMarkdown:
+          'Las props son de solo lectura. Si un componente necesita un valor que cambia con el tiempo, ese valor debe ser estado (useState), no una prop modificada directamente.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown:
+          'Dado este árbol: `App` renderiza `ListaAlumnos`, y `ListaAlumnos` renderiza varias `FilaAlumno`. ¿De dónde vienen los datos de cada `FilaAlumno`?',
+        options: [
+          'De las props que le pasa ListaAlumnos, un alumno a la vez',
+          'De una variable global compartida',
+          'FilaAlumno los pide directamente con fetch',
+          'De props que le pasa App directamente, saltándose a ListaAlumnos',
+        ],
+        correctAnswer: 'De las props que le pasa ListaAlumnos, un alumno a la vez',
+        hints: ['Los datos fluyen de padre inmediato a hijo inmediato, un nivel a la vez.'],
+        explanationMarkdown:
+          'ListaAlumnos recibe la lista completa (probablemente como prop desde App) y le pasa a cada FilaAlumno solo los datos de un alumno, vía props.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown:
+          '¿Cuál de estos datos debería ser prop, y cuál estado interno (useState), en un componente `FormularioCalificacion`?',
+        codeSnippet:
+          '// A: el id del alumno que se está calificando (lo decide un componente de arriba)\n// B: el texto que el profesor está escribiendo en el input, mientras escribe',
+        options: ['A es prop, B es estado', 'A es estado, B es prop', 'Ambos deberían ser props', 'Ambos deberían ser estado'],
+        correctAnswer: 'A es prop, B es estado',
+        hints: [
+          'Pregúntate: ¿quién decide/controla ese dato? Si lo decide un componente de arriba, es prop. Si el propio componente lo controla mientras el usuario interactúa, es estado.',
+        ],
+        explanationMarkdown:
+          'El id del alumno lo decide quién abrió el formulario (viene de afuera = prop). El texto que se está escribiendo lo controla el propio formulario mientras el usuario teclea (cambia internamente = estado).',
+      },
+    ],
+    challenge: {
+      id: 'reto-react-props',
+      promptMarkdown:
+        'Completa `filaAlumno({ nombre, nota })` para que retorne el texto de una fila, y `renderizarLista(alumnos)` para que junte todas las filas, simulando lo que React haría al mapear una lista de componentes.',
+      starterCode:
+        'function filaAlumno({ nombre, nota }) {\n  // Retorna: "<nombre>: <nota>"\n  return "";\n}\n\nfunction renderizarLista(alumnos) {\n  // Usa filaAlumno() para cada alumno y une los resultados con "\\n"\n  return "";\n}\n\nconsole.log(renderizarLista([\n  { nombre: "Mateo", nota: 8 },\n  { nombre: "Fernanda", nota: 10 },\n]));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-mateo', type: 'stdoutIncludes', label: 'Mateo: 8', value: 'Mateo: 8', failureMessage: 'Falta la fila de Mateo con el formato "Mateo: 8".' },
+        { id: 'check-fernanda', type: 'stdoutIncludes', label: 'Fernanda: 10', value: 'Fernanda: 10', failureMessage: 'Falta la fila de Fernanda: renderizarLista debe recorrer TODOS los alumnos, no solo el primero.' },
+      ],
+      hints: [
+        "renderizarLista puede usar `alumnos.map(filaAlumno).join('\\n')`.",
+        'filaAlumno recibe props destructuradas, igual que en los ejemplos de arriba.',
+      ],
+      expectedEvidenceMarkdown: 'La consola debe mostrar "Mateo: 8" y "Fernanda: 10", cada uno en su línea.',
+    },
+    reflectionPromptMarkdown:
+      'Piensa en una pantalla de una app que uses seguido con una lista repetida (mensajes de chat, productos, publicaciones). ¿Qué props crees que recibe cada elemento repetido de esa lista?',
+    masteryCriteria: [
+      'Explico qué es una prop y por qué es de solo lectura.',
+      'Predigo qué props recibe un componente dado un árbol de componentes padre-hijo.',
+      'Distingo cuándo un dato debe ser prop y cuándo debe ser estado interno.',
+      'Escribí una función que simula renderizar una lista de componentes a partir de props.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-react-usestate',
+    moduleId: 'mod-5-v2',
+    phaseId: 'fase-2',
+    order: 14,
+    title: 'V2.14 useState: cuándo React vuelve a dibujar la pantalla',
+    category: 'Frontend',
+    summary: 'Descubre qué retorna useState y cuándo una actualización de estado dispara un nuevo render.',
+    prerequisiteLessonIds: ['lesson-v2-react-props'],
+    estimatedMinutes: 50,
+    xpReward: 105,
+    icon: RefreshCw,
+    color: 'from-sky-500 to-indigo-500',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar qué hace useState y qué retorna (el valor actual y una función para actualizarlo).',
+      'Predecir cuándo un cambio de estado causa un nuevo render y cuándo no.',
+      'Reconocer el error de modificar el estado directamente en vez de usar la función setter.',
+    ],
+    concept: {
+      explanationMarkdown:
+        '`useState(valorInicial)` le da a un componente una "memoria" que sobrevive entre renders. Retorna un arreglo de 2 elementos: el valor ACTUAL del estado, y una función para actualizarlo (`const [contador, setContador] = useState(0);`). Cuando llamas a la función setter (`setContador(1)`), React vuelve a ejecutar el componente con el nuevo valor y actualiza lo que se ve en pantalla: eso es un "re-render".',
+      whyItMattersMarkdown:
+        'useState es el hook más usado en todo React. Cualquier cosa que cambie por interacción del usuario (un contador, un formulario, un filtro, un modal abierto/cerrado) se maneja con useState. Si no entiendes cuándo dispara un re-render, vas a escribir componentes que "no se actualizan" o que se actualizan de más.',
+      realWorldContextMarkdown:
+        'Cuando un profesor edita una calificación en un formulario de SASE, cada tecla que presiona actualiza el estado del input (useState) y React vuelve a dibujar ese campo con el nuevo valor. Solo cuando presiona "Guardar" ese valor, ya en estado, se manda al servidor.',
+      narrationText:
+        'useState le da memoria a un componente entre renders. Solo llamar a la función setter le avisa a React que debe volver a dibujar la pantalla.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-usestate-simulado',
+        title: 'useState básico (simulado)',
+        code: 'function crearEstado(valorInicial) {\n  let valor = valorInicial;\n  const renders = [];\n  function set(nuevoValor) {\n    valor = nuevoValor;\n    renders.push(valor); // simula que React vuelve a "dibujar"\n  }\n  return { obtener: () => valor, set, renders };\n}\n\nconst contador = crearEstado(0);\ncontador.set(1);\ncontador.set(2);\nconsole.log("Valor final:", contador.obtener());\nconsole.log("Renders:", contador.renders);',
+        explanationMarkdown:
+          'Esta simulación imita el comportamiento observable de useState: cada `set(...)` es como una llamada al setter, y queda registrada como un "re-render" en el arreglo `renders`.',
+      },
+      {
+        id: 'ejemplo-mutar-directo',
+        title: 'El error común: mutar directamente',
+        code: 'let contador = 0;\ncontador = contador + 1; // esto NO dispara un re-render en React real\n// En React real necesitarías: setContador(contador + 1);\nconsole.log("Esto cambia la variable, pero React nunca se entera.");',
+        explanationMarkdown: 'Reasignar una variable normal no le avisa a React que algo cambió. Solo llamar a la función setter dispara un re-render.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué retorna useState(0)?',
+        options: [
+          'Un arreglo con [valorActual, funcionParaActualizar]',
+          'Solo el valor actual',
+          'Solo la función para actualizar',
+          'Un objeto con { valor, set }',
+        ],
+        correctAnswer: 'Un arreglo con [valorActual, funcionParaActualizar]',
+        hints: ['Por eso se usa destructuring de arreglo: const [x, setX] = useState(...)'],
+        explanationMarkdown: 'useState siempre retorna un arreglo de 2 posiciones: el valor actual y la función setter, en ese orden.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Cuál de estas dos líneas SÍ dispara un nuevo render en React?',
+        codeSnippet: '// A: contador = contador + 1;\n// B: setContador(contador + 1);',
+        options: ['Solo B', 'Solo A', 'Ambas', 'Ninguna'],
+        correctAnswer: 'Solo B',
+        hints: ['Solo llamar a la función que devuelve useState le avisa a React que algo cambió.'],
+        explanationMarkdown:
+          'A reasigna una variable normal, invisible para React. B llama al setter, que es la única forma de decirle a React "vuelve a dibujar con este nuevo valor".',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown:
+          'Si `setContador` se llama 3 veces seguidas dentro de la misma función con un valor nuevo cada vez, ¿qué termina mostrando React?',
+        options: ['El valor final después de la última llamada', 'La suma de las 3 llamadas', 'Un error, no se puede llamar 2 veces seguidas', 'El valor inicial, sin cambios'],
+        correctAnswer: 'El valor final después de la última llamada',
+        hints: ['Piensa en la simulación del ejemplo: cada set() sobreescribe el valor anterior.'],
+        explanationMarkdown: 'Cada llamada al setter actualiza el estado con ese valor. Lo que termina viéndose en pantalla es el resultado de la última actualización aplicada.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: 'Este componente simulado tiene un bug: el contador nunca cambia visualmente. ¿Cuál es?',
+        codeSnippet:
+          'function ComponenteContador() {\n  let contador = 0;\n  function incrementar() {\n    contador = contador + 1;\n    console.log("Contador interno:", contador);\n  }\n  incrementar();\n  incrementar();\n}',
+        options: [
+          'Usa una variable normal (let) en vez de useState, así que React nunca sabe que debe re-renderizar',
+          'Le falta un console.log extra',
+          'incrementar() está mal escrita',
+          'El código no tiene ningún error',
+        ],
+        correctAnswer: 'Usa una variable normal (let) en vez de useState, así que React nunca sabe que debe re-renderizar',
+        hints: ['La variable cambia "por dentro" de la función, pero React no se entera de cambios en variables normales entre renders.'],
+        explanationMarkdown:
+          'Sin useState, `contador` se reinicia a 0 cada vez que el componente se vuelve a ejecutar, y React nunca recibe la señal de "actualízate" porque nadie llamó a un setter.',
+      },
+    ],
+    challenge: {
+      id: 'reto-usestate',
+      promptMarkdown:
+        'Completa `crearContador(inicial)`: debe retornar `{ obtener, incrementar }`, donde `incrementar()` aumenta el valor en 1 cada vez que se llama, y `obtener()` siempre retorna el valor actual (simulando el par [valor, setValor] de useState).',
+      starterCode:
+        'function crearContador(inicial) {\n  // Completa: guarda el valor y expón obtener()/incrementar()\n}\n\nconst contador = crearContador(0);\ncontador.incrementar();\ncontador.incrementar();\ncontador.incrementar();\nconsole.log("Valor final:", contador.obtener());',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-valor-final', type: 'stdoutIncludes', label: 'Valor final: 3', value: 'Valor final: 3', failureMessage: 'Después de 3 llamadas a incrementar(), obtener() debería regresar 3.' },
+      ],
+      hints: [
+        'Guarda el valor en una variable dentro de crearContador (closure), y que incrementar() la modifique.',
+        'obtener() debe leer siempre el valor MÁS RECIENTE, no uno copiado al inicio.',
+      ],
+      expectedEvidenceMarkdown: 'La consola debe mostrar "Valor final: 3" después de 3 llamadas a incrementar().',
+    },
+    reflectionPromptMarkdown:
+      'Con la lección anterior (props): ¿qué pasaría si alguien intentara usar una prop como si fuera estado, tratando de "incrementarla" directamente? ¿Por qué no funcionaría igual que con useState?',
+    masteryCriteria: [
+      'Explico qué retorna useState y en qué orden.',
+      'Predigo si una línea de código dispara o no un nuevo render.',
+      'Detecto el bug de usar una variable normal en vez de useState para algo que debería re-renderizar.',
+      'Escribí una función que simula el comportamiento de useState con closures.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-react-levantar-estado',
+    moduleId: 'mod-5-v2',
+    phaseId: 'fase-2',
+    order: 15,
+    title: 'V2.15 Levantar el estado: comunicar dos componentes hermanos',
+    category: 'Frontend',
+    summary: 'Aplica el patrón de subir el estado al padre común cuando dos componentes hermanos deben compartir un dato.',
+    prerequisiteLessonIds: ['lesson-v2-react-usestate'],
+    estimatedMinutes: 50,
+    xpReward: 110,
+    icon: ArrowUp,
+    color: 'from-blue-500 to-violet-600',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar por qué dos componentes "hermanos" no pueden compartir estado directamente entre sí.',
+      'Aplicar el patrón de "levantar el estado" al padre común y pasarlo hacia abajo como props.',
+      'Distinguir una función que se pasa como prop (para avisar) de un dato que se pasa como prop (para mostrar).',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Cuando dos componentes "hermanos" (con el mismo padre) necesitan compartir o reaccionar al mismo dato, ese dato no puede vivir en ninguno de los dos por separado: tiene que vivir en su padre común, con `useState`. El padre le pasa el valor hacia abajo como prop a ambos hijos, y si un hijo necesita cambiarlo, el padre también le pasa una función (normalmente el setter) como prop, para que el hijo la llame.',
+      whyItMattersMarkdown:
+        'Este patrón, "levantar el estado" (lifting state up), es la solución de React para el 90% de los casos donde "un componente no se entera de lo que pasa en otro". Es de los conceptos que más cuesta a quien empieza, porque la solución es contraintuitiva: en vez de conectar los hermanos entre sí, subes el dato un nivel.',
+      realWorldContextMarkdown:
+        'En SASE, si un filtro (`FiltroGrupo`) y una tabla (`TablaAlumnos`) son hermanos dentro de `PantallaCalificaciones`, y seleccionar un grupo en el filtro debe actualizar lo que muestra la tabla, el grupo seleccionado tiene que vivir como estado en `PantallaCalificaciones` (el padre), no en `FiltroGrupo` ni en `TablaAlumnos` por separado.',
+      narrationText:
+        'Cuando dos componentes hermanos comparten un dato, ese dato sube al padre común como estado, y baja de nuevo a ambos hijos como props.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-estado-en-padre',
+        title: 'El estado vive en el padre, no en los hermanos',
+        code: 'function crearPantalla() {\n  let grupoSeleccionado = "Todos";\n\n  function FiltroGrupo({ onCambiarGrupo }) {\n    return { simularClick: (grupo) => onCambiarGrupo(grupo) };\n  }\n\n  function TablaAlumnos({ grupo }) {\n    return `Mostrando alumnos del grupo: ${grupo}`;\n  }\n\n  const filtro = FiltroGrupo({ onCambiarGrupo: (grupo) => { grupoSeleccionado = grupo; } });\n  filtro.simularClick("2B");\n  return TablaAlumnos({ grupo: grupoSeleccionado });\n}\nconsole.log(crearPantalla());',
+        explanationMarkdown:
+          '`grupoSeleccionado` vive en el padre (`crearPantalla`). `FiltroGrupo` no guarda el grupo, solo AVISA al padre con la función `onCambiarGrupo` que recibió como prop. `TablaAlumnos` solo LEE el grupo actual que el padre le pasa.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: 'Dos componentes hermanos, `Buscador` y `ListaResultados`, necesitan compartir el texto que el usuario escribió. ¿Dónde debería vivir ese texto como estado?',
+        options: [
+          'En el componente padre común de ambos',
+          'En Buscador únicamente',
+          'En ListaResultados únicamente',
+          'En cada uno por separado, sincronizados con useEffect',
+        ],
+        correctAnswer: 'En el componente padre común de ambos',
+        hints: ['Los hermanos no pueden leerse el estado entre sí directamente.'],
+        explanationMarkdown: 'Como ambos hermanos necesitan ese dato, tiene que "subir" al padre común, que se lo pasa a ambos como prop.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué tipo de prop le pasa el padre a un hijo para que ese hijo pueda AVISARLE que algo cambió, no solo para mostrar un dato?',
+        options: ['Una función', 'Un string', 'Un número', 'Un booleano'],
+        correctAnswer: 'Una función',
+        hints: ['El hijo "llama" a esa prop cuando pasa algo, como un evento de click.'],
+        explanationMarkdown: 'Pasar una función como prop (por ejemplo `onCambiarGrupo`) le da al hijo una forma de comunicarse hacia arriba, sin controlar el estado directamente.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'En el ejemplo de la Pantalla, ¿por qué `FiltroGrupo` no tiene su propio useState para `grupoSeleccionado`?',
+        options: [
+          'Porque otro componente hermano (TablaAlumnos) también necesita ese valor, así que debe vivir un nivel arriba',
+          'Porque los filtros nunca usan useState',
+          'Porque useState solo funciona en el componente raíz de la app',
+          'Porque grupoSeleccionado es una prop, nunca puede ser estado en ningún lado',
+        ],
+        correctAnswer: 'Porque otro componente hermano (TablaAlumnos) también necesita ese valor, así que debe vivir un nivel arriba',
+        hints: ['Si el dato solo lo usara FiltroGrupo, sí podría ser estado local ahí. El problema es que se COMPARTE.'],
+        explanationMarkdown: 'La regla no es "los filtros nunca tienen estado propio"; es que un dato compartido entre hermanos debe vivir en el ancestro común, no duplicado en cada uno.',
+      },
+    ],
+    challenge: {
+      id: 'reto-levantar-estado',
+      promptMarkdown:
+        'Completa `crearPantallaCalificaciones()`: debe tener un estado `grupoSeleccionado` (inicial "Todos"), pasarlo a `resumenGrupo(grupo)` para mostrar el texto, y una función `seleccionarGrupo(nuevoGrupo)` que actualice el estado antes de volver a generar el resumen.',
+      starterCode:
+        'function resumenGrupo(grupo) {\n  return `Mostrando alumnos del grupo: ${grupo}`;\n}\n\nfunction crearPantallaCalificaciones() {\n  let grupoSeleccionado = "Todos";\n\n  function seleccionarGrupo(nuevoGrupo) {\n    // Completa: actualiza grupoSeleccionado\n  }\n\n  return { seleccionarGrupo, obtenerResumen: () => resumenGrupo(grupoSeleccionado) };\n}\n\nconst pantalla = crearPantallaCalificaciones();\nconsole.log(pantalla.obtenerResumen());\npantalla.seleccionarGrupo("3C");\nconsole.log(pantalla.obtenerResumen());',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-inicial', type: 'stdoutIncludes', label: 'Mostrando alumnos del grupo: Todos', value: 'Mostrando alumnos del grupo: Todos', failureMessage: 'Antes de seleccionar un grupo, el resumen debe mostrar "Todos".' },
+        { id: 'check-actualizado', type: 'stdoutIncludes', label: 'Mostrando alumnos del grupo: 3C', value: 'Mostrando alumnos del grupo: 3C', failureMessage: 'Después de seleccionarGrupo("3C"), el resumen debe reflejar el nuevo grupo.' },
+      ],
+      hints: [
+        'seleccionarGrupo debe reasignar la variable grupoSeleccionado (closure), igual que el setter simulado de la lección anterior.',
+        'obtenerResumen debe leer el valor MÁS RECIENTE de grupoSeleccionado, no uno copiado antes.',
+      ],
+      expectedEvidenceMarkdown: 'La consola debe mostrar primero el resumen con "Todos" y después con "3C", reflejando el cambio de estado.',
+    },
+    reflectionPromptMarkdown:
+      'Con las 3 lecciones de React (props, useState, levantar el estado), describe en 2-3 frases el flujo completo de datos en una pantalla con un filtro y una tabla: qué vive dónde, y quién le avisa a quién.',
+    masteryCriteria: [
+      'Explico por qué dos hermanos no pueden compartir estado directamente.',
+      'Identifico cuándo un dato compartido debe "subir" al padre común.',
+      'Distingo una prop-función (para avisar) de una prop-dato (para mostrar).',
+      'Escribí un patrón completo de estado levantado: el padre guarda, pasa hacia abajo, y recibe avisos hacia arriba.',
     ],
   },
 ];

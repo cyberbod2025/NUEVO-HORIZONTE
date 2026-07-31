@@ -79,6 +79,18 @@ El sandbox de ejecución solo corre JavaScript, no TypeScript, así que los tres
 
 Nota de proceso: en un primer intento, las 3 lecciones nuevas se insertaron por error entre `lesson-v2-git-ramas` (orden 8) y `lesson-v2-conventional-commits` (orden 9) en vez de al final del arreglo, lo que rompió la prueba de orden secuencial (`vitest` lo detectó de inmediato). Se corrigió reordenando los bloques del archivo antes de repetir la verificación completa. Verificación final en verde: 52 pruebas (antes 46), `lessonsV2.ts` sigue al 100% de cobertura, `npm run build` y `npm audit` sin hallazgos.
 
+## Update — seguimiento (módulo 5)
+
+Se migró el territorio del módulo 5 legacy (React: Componentes, Props & useState) a 3 lecciones v2 más, mismo archivo `src/data/lessonsV2.ts`, sin cambios de código en `LessonView`/`TimelineView`/`lessonAdapter.ts`:
+
+13. `lesson-v2-react-props` — qué es un componente, flujo de props de solo lectura de padre a hijo (4 pasos guiados).
+14. `lesson-v2-react-usestate` — qué retorna `useState`, cuándo un cambio dispara un nuevo render (4 pasos guiados).
+15. `lesson-v2-react-levantar-estado` — el patrón "lifting state up" para que dos componentes hermanos compartan un dato (3 pasos guiados).
+
+Restricción de diseño explícita: el sandbox del contrato v2 (igual que el del módulo 5 legacy) solo ejecuta JavaScript plano en un Worker, sin DOM ni transformación JSX — no hay forma de "renderizar" un componente React real. Las 3 lecciones simulan el comportamiento OBSERVABLE de props/useState/lifting-state-up con funciones y closures (`crearEstado`, `crearContador`, `crearPantallaCalificaciones`), el mismo patrón que ya validaron los módulos 3 (Git simulado) y 4 (TypeScript simulado con `typeof`). La prueba `lessonsV2.test.ts` ("ninguna de las 3 lecciones de React depende de un DOM/JSX real") deja esta restricción explícita y verificada, no solo documentada.
+
+`prerequisiteLessonIds` encadena 13→14→15, y la lección 13 depende de `lesson-v2-ts-funciones-genericos` (lección 12), preservando una sola cadena de desbloqueo secuencial a lo largo de las 15 lecciones piloto. El módulo 5 legacy en `curriculum.ts` sigue sin tocarse. Verificación completa (`tsc --noEmit`, `vitest run --coverage`, `npm run build`, `npm audit`) ejecutada de forma independiente (no solo confiando en el reporte previo): en verde, ver el reporte de esta iteración para el detalle exacto.
+
 ## Alternatives considered
 
 - Migrar los 12 módulos completos al contrato v2 de una vez: rechazado para esta iteración por alcance explícito (riesgo alto, sin validación previa del contrato con contenido real).

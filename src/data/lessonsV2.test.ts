@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { LESSONS_V2 } from './lessonsV2';
 
 describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
-  it('define las 12 lecciones piloto (3 fundamentos + 3 JS moderno/async + 3 Git/Conventional Commits + 3 TypeScript)', () => {
-    expect(LESSONS_V2).toHaveLength(12);
+  it('define las 15 lecciones piloto (3 fundamentos + 3 JS moderno/async + 3 Git/Conventional Commits + 3 TypeScript + 3 React)', () => {
+    expect(LESSONS_V2).toHaveLength(15);
   });
 
-  it('tiene ids únicos y orden secuencial 1 a 12', () => {
+  it('tiene ids únicos y orden secuencial 1 a 15', () => {
     const ids = LESSONS_V2.map((lesson) => lesson.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
   });
 
   it('cada lección declara schemaVersion 2 y los campos mínimos del contrato', () => {
@@ -159,5 +159,48 @@ describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
     const checkLabels = funcionesGenericos?.challenge.checks.map((check) => check.label) ?? [];
     expect(checkLabels.some((label) => label.includes('numeros'))).toBe(true);
     expect(checkLabels.some((label) => label.includes('nombres'))).toBe(true);
+  });
+
+  it('las 3 lecciones de React encadenan sus prerrequisitos en orden (13 -> 14 -> 15), continuando desde funciones/genéricos', () => {
+    const funcionesGenericos = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ts-funciones-genericos');
+    const props = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-react-props');
+    const useState = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-react-usestate');
+    const levantarEstado = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-react-levantar-estado');
+
+    expect(props?.prerequisiteLessonIds).toEqual([funcionesGenericos?.id]);
+    expect(useState?.prerequisiteLessonIds).toEqual([props?.id]);
+    expect(levantarEstado?.prerequisiteLessonIds).toEqual([useState?.id]);
+  });
+
+  it('la lección de props exige recorrer TODA la lista, no solo el primer elemento', () => {
+    const props = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-react-props');
+    const checkLabels = props?.challenge.checks.map((check) => check.label) ?? [];
+    expect(checkLabels).toEqual(['Mateo: 8', 'Fernanda: 10']);
+  });
+
+  it('la lección de useState verifica el valor final tras varias llamadas al "setter" simulado', () => {
+    const useState = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-react-usestate');
+    expect(useState?.challenge.starterCode).toContain('incrementar');
+    expect(useState?.challenge.checks.some((check) => check.label.includes('3'))).toBe(true);
+  });
+
+  it('la lección de levantar el estado verifica tanto el valor inicial como el actualizado (el padre re-render a ambos hijos)', () => {
+    const levantarEstado = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-react-levantar-estado');
+    const checkLabels = levantarEstado?.challenge.checks.map((check) => check.label) ?? [];
+    expect(checkLabels.some((label) => label.includes('Todos'))).toBe(true);
+    expect(checkLabels.some((label) => label.includes('3C'))).toBe(true);
+  });
+
+  it('ninguna de las 3 lecciones de React depende de un DOM/JSX real: el sandbox solo ejecuta JS', () => {
+    // Nota: no se valida con una regexp "sin < seguido de letra" porque los
+    // comentarios de starterCode usan `<nombre>` como notación de placeholder
+    // (ver reto de props), lo cual daría un falso positivo de "JSX". La
+    // garantía real es que el runner (`runCode.ts`) solo evalúa JavaScript.
+    const idsReact = ['lesson-v2-react-props', 'lesson-v2-react-usestate', 'lesson-v2-react-levantar-estado'];
+    for (const id of idsReact) {
+      const lesson = LESSONS_V2.find((l) => l.id === id);
+      expect(lesson?.challenge.language).toBe('javascript');
+      expect(lesson?.challenge.starterCode).not.toMatch(/<\/[A-Za-z]|\/>/); // sin cierre de etiqueta JSX
+    }
   });
 });

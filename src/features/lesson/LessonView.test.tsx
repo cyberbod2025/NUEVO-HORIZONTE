@@ -244,3 +244,42 @@ describe('LessonView — migración de seguimiento (TypeScript esencial)', () =>
     expect(screen.getByText(/Evidencia esperada:/)).toBeInTheDocument();
   });
 });
+
+describe('LessonView — migración de seguimiento (React: props, useState, levantar estado)', () => {
+  const props = normalizeLesson(LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-react-props')!);
+
+  it('renderiza la lección de props con sus 4 pasos guiados', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={props}
+        lessonStage="guided"
+        guidedStepIndex={0}
+        sandboxCode={props.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText(`Paso 1 de ${props.guidedPractice.length}`)).toBeInTheDocument();
+    expect(props.guidedPractice).toHaveLength(4);
+  });
+
+  it('muestra reflexión y criterios de dominio al superar el reto de levantar el estado', () => {
+    const levantarEstado = normalizeLesson(
+      LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-react-levantar-estado')!,
+    );
+
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={levantarEstado}
+        lessonStage="solo"
+        guidedStepIndex={0}
+        sandboxCode={levantarEstado.challenge.starterCode}
+        sandboxSuccess
+      />,
+    );
+
+    expect(screen.getByText('Pregunta de reflexión')).toBeInTheDocument();
+    expect(screen.getByText('¿Ya domino esto?')).toBeInTheDocument();
+  });
+});
