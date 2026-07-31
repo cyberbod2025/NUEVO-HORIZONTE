@@ -67,6 +67,18 @@ Se migró el territorio del módulo 3 legacy (Terminal, Git & Conventional Commi
 
 Como el sandbox del contrato v2 solo ejecuta JavaScript (no un shell real), los retos finales de estas 3 lecciones son simulaciones en JS del comportamiento de Git (`simularCommit`, `crearRama`, `formatearCommit`) en vez de comandos reales, siguiendo el mismo patrón que ya usaba el sandbox del módulo 3 legacy en `curriculum.ts` (`formatearCommit`). `prerequisiteLessonIds` encadena 7→8→9, y la lección 7 depende de `lesson-v2-js-async-await` (lección 6), manteniendo una sola cadena de desbloqueo secuencial a lo largo de las 9 lecciones piloto. El módulo 3 legacy en `curriculum.ts` sigue sin tocarse. Verificación repetida completa (`tsc --noEmit`, `vitest run --coverage`, `npm run build`, `npm audit`) en verde: 46 pruebas (antes 40), `lessonsV2.ts` sigue al 100% de cobertura, 0 vulnerabilidades.
 
+## Update — seguimiento (módulo 4)
+
+Se migró el territorio del módulo 4 legacy (TypeScript Esencial & Tipado Estático) a 3 lecciones v2 más, mismo archivo `src/data/lessonsV2.ts`, sin cambios de código en `LessonView`/`TimelineView`/`lessonAdapter.ts`:
+
+10. `lesson-v2-ts-tipos-basicos` — anotaciones de tipo primitivas (`string`/`number`/`boolean`) y por qué TypeScript detecta errores antes de ejecutar (4 pasos guiados).
+11. `lesson-v2-ts-interfaces` — `interface` para describir la forma de un objeto, propiedades opcionales con `?` (4 pasos guiados).
+12. `lesson-v2-ts-funciones-genericos` — parámetros/retorno tipados y genéricos básicos (`<T>`) frente a `any` (4 pasos guiados).
+
+El sandbox de ejecución solo corre JavaScript, no TypeScript, así que los tres retos finales simulan EN TIEMPO DE EJECUCIÓN, con `typeof`, la misma verificación que TypeScript haría en el editor (`validarCalificacion`, `cumpleInterfazAlumno`, y un par `promedioNotas`/`primerElemento` que ejercita el mismo razonamiento genérico) — mismo patrón que ya usaba el sandbox del módulo 4 legacy (`validarDocente` en `curriculum.ts`). `prerequisiteLessonIds` encadena 10→11→12, y la lección 10 depende de `lesson-v2-conventional-commits` (lección 9), preservando una sola cadena de desbloqueo secuencial a lo largo de las 12 lecciones piloto. El módulo 4 legacy en `curriculum.ts` sigue sin tocarse.
+
+Nota de proceso: en un primer intento, las 3 lecciones nuevas se insertaron por error entre `lesson-v2-git-ramas` (orden 8) y `lesson-v2-conventional-commits` (orden 9) en vez de al final del arreglo, lo que rompió la prueba de orden secuencial (`vitest` lo detectó de inmediato). Se corrigió reordenando los bloques del archivo antes de repetir la verificación completa. Verificación final en verde: 52 pruebas (antes 46), `lessonsV2.ts` sigue al 100% de cobertura, `npm run build` y `npm audit` sin hallazgos.
+
 ## Alternatives considered
 
 - Migrar los 12 módulos completos al contrato v2 de una vez: rechazado para esta iteración por alcance explícito (riesgo alto, sin validación previa del contrato con contenido real).

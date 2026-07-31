@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { LESSONS_V2 } from './lessonsV2';
 
 describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
-  it('define las 9 lecciones piloto (3 fundamentos + 3 JS moderno/async + 3 Git/Conventional Commits)', () => {
-    expect(LESSONS_V2).toHaveLength(9);
+  it('define las 12 lecciones piloto (3 fundamentos + 3 JS moderno/async + 3 Git/Conventional Commits + 3 TypeScript)', () => {
+    expect(LESSONS_V2).toHaveLength(12);
   });
 
-  it('tiene ids únicos y orden secuencial 1 a 9', () => {
+  it('tiene ids únicos y orden secuencial 1 a 12', () => {
     const ids = LESSONS_V2.map((lesson) => lesson.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   });
 
   it('cada lección declara schemaVersion 2 y los campos mínimos del contrato', () => {
@@ -126,5 +126,38 @@ describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
     expect(conventionalCommits?.challenge.starterCode).toContain('tiposValidos');
     const checkLabels = conventionalCommits?.challenge.checks.map((check) => check.label) ?? [];
     expect(checkLabels.some((label) => label.toLowerCase().includes('inválido'))).toBe(true);
+  });
+
+  it('las 3 lecciones de TypeScript encadenan sus prerrequisitos en orden (10 -> 11 -> 12), continuando desde Conventional Commits', () => {
+    const conventionalCommits = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-conventional-commits');
+    const tiposBasicos = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ts-tipos-basicos');
+    const interfaces = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ts-interfaces');
+    const funcionesGenericos = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ts-funciones-genericos');
+
+    expect(tiposBasicos?.prerequisiteLessonIds).toEqual([conventionalCommits?.id]);
+    expect(interfaces?.prerequisiteLessonIds).toEqual([tiposBasicos?.id]);
+    expect(funcionesGenericos?.prerequisiteLessonIds).toEqual([interfaces?.id]);
+  });
+
+  it('la lección de tipos básicos simula en JS la verificación de tipos que haría TypeScript (typeof)', () => {
+    const tiposBasicos = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ts-tipos-basicos');
+    expect(tiposBasicos?.challenge.starterCode).toContain('typeof valor');
+    const checkLabels = tiposBasicos?.challenge.checks.map((check) => check.label) ?? [];
+    expect(checkLabels.some((label) => label.toLowerCase().includes('error de tipos'))).toBe(true);
+  });
+
+  it('la lección de interfaces distingue un objeto que cumple la forma de uno que no la cumple', () => {
+    const interfaces = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ts-interfaces');
+    const checkLabels = interfaces?.challenge.checks.map((check) => check.label) ?? [];
+    expect(checkLabels.some((label) => label.toLowerCase().includes('valido:'))).toBe(true);
+    expect(checkLabels.some((label) => label.toLowerCase().includes('invalido:'))).toBe(true);
+  });
+
+  it('la lección de funciones/genéricos exige que la misma función funcione con números y con strings', () => {
+    const funcionesGenericos = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ts-funciones-genericos');
+    expect(funcionesGenericos?.challenge.checks.length).toBeGreaterThanOrEqual(3);
+    const checkLabels = funcionesGenericos?.challenge.checks.map((check) => check.label) ?? [];
+    expect(checkLabels.some((label) => label.includes('numeros'))).toBe(true);
+    expect(checkLabels.some((label) => label.includes('nombres'))).toBe(true);
   });
 });

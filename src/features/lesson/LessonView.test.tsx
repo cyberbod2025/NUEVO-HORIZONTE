@@ -207,3 +207,40 @@ describe('LessonView — migración de seguimiento (Git y Conventional Commits)'
     expect(screen.getByText(/Evidencia esperada:/)).toBeInTheDocument();
   });
 });
+
+describe('LessonView — migración de seguimiento (TypeScript esencial)', () => {
+  const interfaces = normalizeLesson(LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ts-interfaces')!);
+
+  it('renderiza la lección de interfaces con sus 4 pasos guiados', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={interfaces}
+        lessonStage="guided"
+        guidedStepIndex={0}
+        sandboxCode={interfaces.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText(`Paso 1 de ${interfaces.guidedPractice.length}`)).toBeInTheDocument();
+    expect(interfaces.guidedPractice).toHaveLength(4);
+  });
+
+  it('muestra la evidencia esperada del reto de funciones/genéricos', () => {
+    const funcionesGenericos = normalizeLesson(
+      LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ts-funciones-genericos')!,
+    );
+
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={funcionesGenericos}
+        lessonStage="solo"
+        guidedStepIndex={0}
+        sandboxCode={funcionesGenericos.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText(/Evidencia esperada:/)).toBeInTheDocument();
+  });
+});

@@ -1,4 +1,4 @@
-import { Braces, Brain, Code, GitBranch, GitCommit, Globe, Sliders, Terminal, Zap } from 'lucide-react';
+import { Boxes, Braces, Brain, Code, FileCode, GitBranch, GitCommit, Globe, Puzzle, Sliders, Terminal, Zap } from 'lucide-react';
 import type { LessonV2 } from '../types/lesson';
 
 /**
@@ -9,11 +9,17 @@ import type { LessonV2 } from '../types/lesson';
  * variables/condicionales/funciones (territorio del módulo 1 legacy); las 3
  * siguientes cubren JS moderno y asincronía (territorio del módulo 2 legacy:
  * arrow functions, destructuring, template literals, promesas, async/await y
- * fetch); las 3 últimas (agregadas en esta microtarea) cubren terminal, Git y
- * Conventional Commits (territorio del módulo 3 legacy: staging area y commit,
- * ramas, y el estándar de mensajes de commit). No sustituyen `MODULES`;
- * conviven con él mientras se valida el contrato antes de migrar el resto del
- * currículo.
+ * fetch); las 3 siguientes cubren terminal, Git y Conventional Commits
+ * (territorio del módulo 3 legacy: staging area y commit, ramas, y el estándar
+ * de mensajes de commit); las 3 últimas (agregadas en esta microtarea) cubren
+ * TypeScript esencial (territorio del módulo 4 legacy: tipos primitivos,
+ * interfaces y funciones/genéricos tipados). El sandbox de ejecución solo
+ * corre JavaScript (ver `src/features/sandbox/`), así que los retos de estas 3
+ * lecciones simulan en JS puro, en tiempo de ejecución, la misma verificación
+ * de tipos que TypeScript haría en el editor — mismo patrón que ya usaba el
+ * sandbox del módulo 4 legacy (`validarDocente` en `curriculum.ts`). No
+ * sustituyen `MODULES`; conviven con él mientras se valida el contrato antes
+ * de migrar el resto del currículo.
  */
 export const LESSONS_V2: LessonV2[] = [
   {
@@ -1142,6 +1148,436 @@ export const LESSONS_V2: LessonV2[] = [
       'Escribo un mensaje de commit con el formato tipo(alcance): descripción.',
       'Detecto cuándo un mensaje de commit es demasiado vago para ser útil.',
       'Escribí una función que valida el tipo de commit contra una lista de tipos permitidos antes de formatear el mensaje.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-ts-tipos-basicos',
+    moduleId: 'mod-4-v2',
+    phaseId: 'fase-1',
+    order: 10,
+    title: 'V2.10 TypeScript: tipos básicos y por qué previenen errores antes de ejecutar',
+    category: 'TypeScript',
+    summary: 'Anota variables y parámetros con string, number y boolean, y entiende qué error evita cada uno.',
+    prerequisiteLessonIds: ['lesson-v2-conventional-commits'],
+    estimatedMinutes: 40,
+    xpReward: 90,
+    icon: FileCode,
+    color: 'from-blue-500 to-blue-700',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Anotar variables y parámetros de función con los tipos primitivos string, number y boolean.',
+      'Explicar la diferencia entre un error que TypeScript detecta al escribir código y uno que JavaScript solo revela al ejecutarlo.',
+      'Leer un error de tipos y distinguir cuál tipo se esperaba y cuál se recibió realmente.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'TypeScript es JavaScript con anotaciones de tipo opcionales. `let nota: number = 8;` le dice al editor que `nota` SIEMPRE debe contener un número; si en algún punto del código intentas asignarle un texto, TypeScript marca el error ahí mismo, antes de ejecutar nada. Los tres tipos primitivos más comunes son `string` (texto), `number` (números, sin distinguir enteros de decimales) y `boolean` (`true`/`false`).',
+      whyItMattersMarkdown:
+        'En JavaScript puro, el bug de `"8" + 1` dando `"81"` (Módulo 2) no se detecta hasta que ejecutas el código y ves el resultado incorrecto. En TypeScript, si declaras `calificacion: number`, ese mismo error se marca en el editor antes de correr el programa ni una sola vez: te ahorra encontrarlo hasta producción.',
+      realWorldContextMarkdown:
+        'En SASE, un formulario HTML siempre entrega los valores capturados como texto, aunque el campo sea "calificación". Si tu función espera `calificacion: number` y le llega un string sin convertir, TypeScript te avisa en el editor antes de que ese dato mal formado llegue a guardarse en la base de datos.',
+      narrationText:
+        'TypeScript agrega anotaciones de tipo a JavaScript. Declaras si una variable es texto, número o booleano, y el editor avisa de inmediato si intentas usarla con el tipo equivocado.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-anotaciones',
+        title: 'Anotar variables con su tipo',
+        code: 'let nombre: string = "Valeria";\nlet calificacion: number = 9;\nlet activo: boolean = true;',
+        explanationMarkdown:
+          'Cada `: tipo` después del nombre de la variable es la anotación. TypeScript usa esa anotación para vigilar que el valor asignado siempre coincida.',
+      },
+      {
+        id: 'ejemplo-error-tipos',
+        title: 'Un error que TypeScript detecta antes de ejecutar',
+        code: 'let calificacion: number = 9;\ncalificacion = "10"; // Error de TypeScript: Type "string" is not assignable to type "number".',
+        explanationMarkdown:
+          'JavaScript permitiría este cambio sin quejarse. TypeScript lo marca como error en el editor porque `calificacion` se declaró como `number`, no como `string`.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué anotación de tipo usarías para una variable que guarda el nombre de un alumno?',
+        codeSnippet: 'let nombre: ______ = "Karla";',
+        options: ['string', 'String', 'text', 'number'],
+        correctAnswer: 'string',
+        hints: ['El tipo primitivo de texto en TypeScript se escribe siempre en minúsculas.'],
+        explanationMarkdown: '`string` (minúscula) es el tipo primitivo de TypeScript para texto.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué anotación usarías para una variable que guarda si un alumno está activo o no?',
+        codeSnippet: 'let activo: ______ = true;',
+        options: ['boolean', 'bool', 'string', 'number'],
+        correctAnswer: 'boolean',
+        hints: ['El tipo para true/false en TypeScript no es una abreviatura.'],
+        explanationMarkdown: '`boolean` es el tipo primitivo que acepta únicamente `true` o `false`.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'Este código tiene un error de TypeScript. ¿Cuál es?',
+        codeSnippet: 'let edad: number = 20;\nedad = "veintiuno";',
+        options: [
+          'Se está asignando un string a una variable declarada como number',
+          'El nombre de la variable es inválido',
+          'Falta un punto y coma',
+          'El código no tiene ningún error',
+        ],
+        correctAnswer: 'Se está asignando un string a una variable declarada como number',
+        hints: ['Revisa la anotación original de `edad` y compárala con el nuevo valor.'],
+        explanationMarkdown:
+          '`edad` se declaró como `number`. Asignarle el texto "veintiuno" viola esa anotación, así que TypeScript marca error antes de ejecutar nada.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: '¿Cuál es la principal ventaja de declarar `calificacion: number` en vez de dejar que el tipo quede libre?',
+        options: [
+          'TypeScript marca en el editor cualquier intento de asignarle un valor que no sea número, antes de ejecutar el código',
+          'El código se ejecuta más rápido en el navegador',
+          'Permite usar más decimales que en JavaScript normal',
+          'No hay ninguna ventaja real',
+        ],
+        correctAnswer: 'TypeScript marca en el editor cualquier intento de asignarle un valor que no sea número, antes de ejecutar el código',
+        hints: ['Piensa en CUÁNDO se detecta el error: ¿al escribir el código o al ejecutarlo?'],
+        explanationMarkdown:
+          'La ventaja central de anotar tipos es detectar errores en el momento de escribir el código, no cuando ya está corriendo (o peor, en producción).',
+      },
+    ],
+    challenge: {
+      id: 'reto-ts-tipos-basicos',
+      promptMarkdown:
+        'El sandbox de este reto ejecuta JavaScript, no TypeScript, así que vas a simular en tiempo real la misma verificación que TypeScript haría en el editor. Completa `validarCalificacion(valor)`.',
+      starterCode:
+        'function validarCalificacion(valor) {\n  // Si typeof valor NO es "number", retorna: "Error de tipos: se esperaba number, se recibio <typeof valor>"\n  // Si es number, retorna: "Calificacion valida: <valor>"\n  return "";\n}\n\nconsole.log(validarCalificacion(9));\nconsole.log(validarCalificacion("9"));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        {
+          id: 'check-numero-valido',
+          type: 'stdoutIncludes',
+          label: 'Calificacion valida: 9',
+          value: 'Calificacion valida: 9',
+          failureMessage: 'Con un número real (9), la función debe confirmar que la calificación es válida.',
+        },
+        {
+          id: 'check-tipo-invalido',
+          type: 'stdoutIncludes',
+          label: 'Error de tipos: se esperaba number, se recibio string',
+          value: 'Error de tipos: se esperaba number, se recibio string',
+          failureMessage: 'Con el string "9" (no el número 9), la función debe rechazarlo indicando el tipo real recibido con typeof.',
+        },
+      ],
+      hints: [
+        'Usa typeof valor para saber el tipo real en tiempo de ejecución.',
+        'Construye el mensaje de error con un template literal que incluya typeof valor directamente.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar "Calificacion valida: 9" y luego el error de tipos indicando que se recibió string.',
+    },
+    reflectionPromptMarkdown:
+      'Piensa en un formulario o sistema que uses seguido (no necesariamente de programación). ¿En qué parte un dato del tipo equivocado (texto en vez de número, por ejemplo) causaría un problema real?',
+    masteryCriteria: [
+      'Anoto variables con los tipos primitivos string, number y boolean.',
+      'Explico la diferencia entre un error detectado al escribir código (TypeScript) y uno detectado solo al ejecutarlo (JavaScript).',
+      'Leo un mensaje de error de tipos e identifico el tipo esperado frente al recibido.',
+      'Escribí una función que valida el tipo de un valor en tiempo de ejecución, simulando lo que TypeScript hace en el editor.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-ts-interfaces',
+    moduleId: 'mod-4-v2',
+    phaseId: 'fase-1',
+    order: 11,
+    title: 'V2.11 Interfaces: describe la forma exacta de un objeto',
+    category: 'TypeScript',
+    summary: 'Define interfaces para objetos y detecta cuándo un objeto no cumple la forma esperada.',
+    prerequisiteLessonIds: ['lesson-v2-ts-tipos-basicos'],
+    estimatedMinutes: 45,
+    xpReward: 100,
+    icon: Boxes,
+    color: 'from-blue-600 to-cyan-700',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Definir una interface que describa las propiedades y tipos exactos de un objeto.',
+      'Distinguir una propiedad obligatoria de una opcional (marcada con `?`).',
+      'Identificar por qué un objeto concreto no cumple una interface dada.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Una interface describe la FORMA exacta que debe tener un objeto: qué propiedades tiene, y de qué tipo es cada una. `interface Alumno { nombre: string; nota: number; }` no crea ningún dato; es un contrato que dice "cualquier objeto declarado como Alumno debe tener exactamente una propiedad `nombre` de tipo string y una propiedad `nota` de tipo number". Un signo `?` después del nombre de la propiedad (`grupo?: string`) la marca como opcional.',
+      whyItMattersMarkdown:
+        'Sin interfaces, cualquier función que reciba un objeto no tiene forma de garantizar que traiga las propiedades que espera hasta que el código truena en producción al acceder a una propiedad que resulta `undefined`. Con una interface, TypeScript avisa en el editor si construyes o le pasas a una función un objeto que no cumple la forma exacta.',
+      realWorldContextMarkdown:
+        'En React (Módulo 5) vas a escribir algo como `interface AlumnoCardProps { nombre: string; nota: number; }` para describir exactamente qué props espera un componente. Si alguien intenta usar ese componente sin pasarle `nota`, TypeScript lo marca como error antes de que la app se ejecute con un dato faltante.',
+      narrationText:
+        'Una interface describe la forma exacta de un objeto: qué propiedades tiene y de qué tipo es cada una. El signo de interrogación marca una propiedad como opcional.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-interface-basica',
+        title: 'Definir e implementar una interface',
+        code: 'interface Alumno {\n  nombre: string;\n  nota: number;\n}\n\nconst valeria: Alumno = { nombre: "Valeria", nota: 9 };',
+        explanationMarkdown:
+          'El objeto `valeria` cumple la interface porque tiene exactamente las propiedades `nombre` (string) y `nota` (number) que la interface exige.',
+      },
+      {
+        id: 'ejemplo-propiedad-opcional',
+        title: 'Una propiedad opcional con ?',
+        code: 'interface Alumno {\n  nombre: string;\n  nota: number;\n  grupo?: string;\n}\n\nconst diego: Alumno = { nombre: "Diego", nota: 7 }; // valido, grupo es opcional',
+        explanationMarkdown:
+          'Como `grupo` tiene `?`, un objeto Alumno es válido aunque no incluya esa propiedad. Sin el `?`, omitirla sería un error de TypeScript.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué palabra clave usa TypeScript para describir la forma que debe tener un objeto?',
+        codeSnippet: '______ Alumno {\n  nombre: string;\n  nota: number;\n}',
+        options: ['interface', 'class', 'type object', 'struct'],
+        correctAnswer: 'interface',
+        hints: ['Es la misma palabra que da título a esta lección.'],
+        explanationMarkdown: '`interface` declara un contrato de forma para objetos; no crea ninguna instancia por sí sola.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: 'Dada esta interface, ¿cuál de estos objetos SÍ la cumple?',
+        codeSnippet: 'interface Docente {\n  nombre: string;\n  materias: number;\n}',
+        options: [
+          '{ nombre: "Hugo", materias: 3 }',
+          '{ nombre: "Hugo", materias: "3" }',
+          '{ nombre: "Hugo" }',
+          '{ materias: 3 }',
+        ],
+        correctAnswer: '{ nombre: "Hugo", materias: 3 }',
+        hints: ['Revisa que AMBAS propiedades estén presentes y con el tipo exacto declarado.'],
+        explanationMarkdown:
+          'Las otras opciones fallan: una tiene `materias` como string, otra le falta `materias`, y otra le falta `nombre`.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: '¿Qué significa el símbolo `?` después del nombre de una propiedad en una interface?',
+        options: [
+          'La propiedad es opcional: el objeto es válido con o sin ella',
+          'La propiedad acepta cualquier tipo de dato',
+          'La propiedad es obligatoria y siempre de tipo boolean',
+          'Es un error de sintaxis',
+        ],
+        correctAnswer: 'La propiedad es opcional: el objeto es válido con o sin ella',
+        hints: ['Piensa en el ejemplo de `grupo?: string`.'],
+        explanationMarkdown: 'El `?` marca la propiedad como opcional; sin él, la propiedad es obligatoria en todo objeto que use esa interface.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: 'Este código marca un error de TypeScript. ¿Cuál es la causa?',
+        codeSnippet: 'interface Alumno {\n  nombre: string;\n  nota: number;\n}\n\nconst marco: Alumno = { nombre: "Marco" };',
+        options: [
+          'Falta la propiedad nota, que es obligatoria en la interface (no tiene ?)',
+          'El nombre "Marco" está mal escrito',
+          'Las interfaces no pueden usarse con const',
+          'El código no tiene ningún error',
+        ],
+        correctAnswer: 'Falta la propiedad nota, que es obligatoria en la interface (no tiene ?)',
+        hints: ['Compara las propiedades del objeto contra las que exige la interface.'],
+        explanationMarkdown:
+          '`nota` no tiene `?` en la interface, así que es obligatoria. El objeto `marco` la omite, por lo que no cumple la forma exigida.',
+      },
+    ],
+    challenge: {
+      id: 'reto-ts-interfaces',
+      promptMarkdown:
+        'Completa `cumpleInterfazAlumno(obj)`, que simula en tiempo de ejecución lo que TypeScript verificaría con la interface `{ nombre: string; nota: number }`.',
+      starterCode:
+        'function cumpleInterfazAlumno(obj) {\n  // Debe tener obj.nombre de tipo string Y obj.nota de tipo number\n  // Si cumple, retorna: "Objeto valido: cumple la interfaz Alumno"\n  // Si no cumple, retorna: "Objeto invalido: no cumple la interfaz Alumno"\n  return "";\n}\n\nconsole.log(cumpleInterfazAlumno({ nombre: "Valeria", nota: 9 }));\nconsole.log(cumpleInterfazAlumno({ nombre: "Marco" }));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        {
+          id: 'check-cumple',
+          type: 'stdoutIncludes',
+          label: 'Objeto valido: cumple la interfaz Alumno',
+          value: 'Objeto valido: cumple la interfaz Alumno',
+          failureMessage: 'Un objeto con nombre (string) y nota (number) debe confirmarse como válido.',
+        },
+        {
+          id: 'check-no-cumple',
+          type: 'stdoutIncludes',
+          label: 'Objeto invalido: no cumple la interfaz Alumno',
+          value: 'Objeto invalido: no cumple la interfaz Alumno',
+          failureMessage: 'Un objeto al que le falta nota debe rechazarse como inválido, no tratarse como si cumpliera la interfaz.',
+        },
+      ],
+      hints: [
+        'Usa typeof obj.nombre === "string" && typeof obj.nota === "number".',
+        'Si falta una propiedad, typeof de esa propiedad es "undefined", no el tipo esperado.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar que el objeto de Valeria es válido, y que el objeto de Marco (sin nota) es inválido.',
+    },
+    reflectionPromptMarkdown:
+      'Piensa en un objeto que uses seguido en tu trabajo (un expediente, un formulario). ¿Qué propiedades serían obligatorias y cuáles opcionales si tuvieras que describirlo como una interface?',
+    masteryCriteria: [
+      'Defino una interface con las propiedades y tipos exactos de un objeto.',
+      'Distingo una propiedad obligatoria de una opcional marcada con ?.',
+      'Identifico por qué un objeto concreto no cumple una interface dada.',
+      'Escribí una función que valida si un objeto cumple una forma específica en tiempo de ejecución.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-ts-funciones-genericos',
+    moduleId: 'mod-4-v2',
+    phaseId: 'fase-1',
+    order: 12,
+    title: 'V2.12 Funciones tipadas y genéricos básicos: reutilizar código sin perder los tipos',
+    category: 'TypeScript',
+    summary: 'Anota parámetros y retorno de funciones, y entiende para qué sirve un genérico como <T>.',
+    prerequisiteLessonIds: ['lesson-v2-ts-interfaces'],
+    estimatedMinutes: 50,
+    xpReward: 110,
+    icon: Puzzle,
+    color: 'from-blue-600 to-indigo-700',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Anotar los parámetros y el tipo de retorno de una función.',
+      'Explicar qué problema resuelve un genérico (`<T>`) frente a usar `any`.',
+      'Predecir el tipo de retorno de una función genérica según el tipo del argumento que recibe.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Una función tipada anota tanto sus parámetros como su valor de retorno: `function sumar(a: number, b: number): number { return a + b; }`. Cuando una función debe funcionar con CUALQUIER tipo sin perder la información de ese tipo (por ejemplo, regresar el primer elemento de un arreglo, sea de strings o de números), se usa un genérico: `function primero<T>(arr: T[]): T { return arr[0]; }`. `T` es un marcador de tipo que TypeScript reemplaza automáticamente según lo que le pases.',
+      whyItMattersMarkdown:
+        'Sin genéricos, la alternativa es usar `any` (aceptar cualquier tipo) y perder toda la protección de TypeScript, o escribir una función distinta para cada tipo de dato. Los genéricos dan lo mejor de ambos mundos: una sola función reutilizable, y TypeScript sigue sabiendo el tipo exacto del resultado en cada llamada.',
+      realWorldContextMarkdown:
+        'Código real que verás pronto usa genéricos así: `useState<Alumno[]>([])` (Módulo 5) le dice a TypeScript que ese estado siempre será un arreglo de Alumno, y avisa si en algún punto intentas meter ahí un dato que no cumple esa forma.',
+      narrationText:
+        'Las funciones tipadas anotan parámetros y retorno. Los genéricos permiten que una función funcione con cualquier tipo sin perder la información de ese tipo, usando una letra como marcador, típicamente T.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-funcion-tipada',
+        title: 'Una función con parámetros y retorno tipados',
+        code: 'function calcularPromedio(notas: number[]): number {\n  return notas.reduce((a, b) => a + b, 0) / notas.length;\n}',
+        explanationMarkdown:
+          '`notas: number[]` dice que el parámetro es un arreglo de números; `: number` después del paréntesis dice que la función siempre retorna un número.',
+      },
+      {
+        id: 'ejemplo-generico',
+        title: 'Una función genérica que preserva el tipo',
+        code: 'function primero<T>(arr: T[]): T {\n  return arr[0];\n}\n\nconst n = primero([1, 2, 3]); // TypeScript sabe que n es number\nconst s = primero(["a", "b"]); // TypeScript sabe que s es string',
+        explanationMarkdown:
+          'La misma función `primero` funciona con arreglos de cualquier tipo, y TypeScript sigue sabiendo el tipo exacto del resultado en cada llamada, sin escribir una versión distinta para cada tipo.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué anotación indica que esta función retorna un number?',
+        codeSnippet: 'function contarAlumnos(lista: string[])______ {\n  return lista.length;\n}',
+        options: [': number', ': string[]', '-> number', 'return number'],
+        correctAnswer: ': number',
+        hints: ['El tipo de retorno se anota justo después de los paréntesis de parámetros, con dos puntos.'],
+        explanationMarkdown: 'El tipo de retorno se escribe con `: tipo` inmediatamente después del paréntesis de parámetros.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué representa la `T` en `function primero<T>(arr: T[]): T`?',
+        options: [
+          'Un marcador de tipo que TypeScript reemplaza según lo que le pases a la función',
+          'El nombre obligatorio de una variable',
+          'Un error de sintaxis',
+          'Un tipo específico llamado T que ya existe en TypeScript',
+        ],
+        correctAnswer: 'Un marcador de tipo que TypeScript reemplaza según lo que le pases a la función',
+        hints: ['T no es un tipo fijo: cambia según el arreglo que le pases en cada llamada.'],
+        explanationMarkdown: '`T` es un parámetro de tipo: TypeScript lo sustituye por el tipo real de los datos en cada llamada a la función.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'Si llamas `primero<T>(arr: T[]): T` con un arreglo de strings, ¿qué tipo tiene el resultado?',
+        codeSnippet: 'const resultado = primero(["Ana", "Luis"]);',
+        options: ['string', 'number', 'any', 'T (sin resolver)'],
+        correctAnswer: 'string',
+        hints: ['TypeScript reemplaza T por el tipo de los elementos del arreglo que realmente le pasaste.'],
+        explanationMarkdown: 'Como el arreglo es de strings, TypeScript resuelve `T` como `string` para esa llamada específica.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: '¿Cuál es la principal desventaja de usar `any` en vez de un genérico para esta misma función?',
+        options: [
+          'Se pierde toda la protección de tipos: TypeScript ya no puede avisar si usas mal el resultado',
+          'any hace que la función sea más lenta en tiempo de ejecución',
+          'any no permite reutilizar la función con distintos tipos',
+          'No hay ninguna desventaja real',
+        ],
+        correctAnswer: 'Se pierde toda la protección de tipos: TypeScript ya no puede avisar si usas mal el resultado',
+        hints: ['Con any, TypeScript deja de vigilar ese valor por completo, en cualquier punto del código.'],
+        explanationMarkdown:
+          '`any` desactiva la verificación de tipos para ese valor. Un genérico mantiene la reutilización SIN perder esa protección.',
+      },
+    ],
+    challenge: {
+      id: 'reto-ts-funciones-genericos',
+      promptMarkdown:
+        'Completa dos funciones que en TypeScript llevarían tipos, para practicar el mismo razonamiento en JavaScript: `promedioNotas(notas)` (equivalente tipado: `(notas: number[]): number`) y `primerElemento(arr)` (equivalente tipado: `<T>(arr: T[]): T`, debe funcionar igual de bien con números que con textos).',
+      starterCode:
+        'function promedioNotas(notas) {\n  // Equivalente tipado: (notas: number[]): number\n  return 0;\n}\n\nfunction primerElemento(arr) {\n  // Equivalente tipado: <T>(arr: T[]): T. Debe funcionar para CUALQUIER tipo de arreglo.\n  return undefined;\n}\n\nconsole.log("Promedio:", promedioNotas([8, 9, 7]));\nconsole.log("Primero (numeros):", primerElemento([10, 20, 30]));\nconsole.log("Primero (nombres):", primerElemento(["Ana", "Luis"]));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        {
+          id: 'check-promedio',
+          type: 'stdoutIncludes',
+          label: 'Promedio: 8',
+          value: 'Promedio: 8',
+          failureMessage: 'promedioNotas([8, 9, 7]) debe calcular el promedio real (8), no un valor fijo.',
+        },
+        {
+          id: 'check-primero-numeros',
+          type: 'stdoutIncludes',
+          label: 'Primero (numeros): 10',
+          value: 'Primero (numeros): 10',
+          failureMessage: 'primerElemento debe regresar el primer elemento real del arreglo de números (10).',
+        },
+        {
+          id: 'check-primero-nombres',
+          type: 'stdoutIncludes',
+          label: 'Primero (nombres): Ana',
+          value: 'Primero (nombres): Ana',
+          failureMessage: 'La MISMA función primerElemento debe funcionar también con un arreglo de strings, regresando "Ana".',
+        },
+      ],
+      hints: [
+        'promedioNotas: usa reduce para sumar los valores y divide entre notas.length.',
+        'primerElemento debe funcionar igual sin importar el tipo de dato del arreglo: usa arr[0] sin revisar de qué tipo son los elementos.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar el promedio (8), y luego el primer elemento correcto tanto para el arreglo de números como para el de nombres, usando la misma función.',
+    },
+    reflectionPromptMarkdown:
+      'Piensa en una función que hayas escrito (o que podrías escribir) que hoy solo funciona con un tipo de dato. ¿Cómo la reescribirías para que funcione con cualquier tipo, sin perder su lógica?',
+    masteryCriteria: [
+      'Anoto parámetros y tipo de retorno de una función.',
+      'Explico qué problema resuelve un genérico frente a usar any.',
+      'Predigo el tipo de retorno de una función genérica según el argumento recibido.',
+      'Escribí una función que se comporta de forma genérica: funciona igual de bien con distintos tipos de datos sin perder su lógica.',
     ],
   },
 ];
