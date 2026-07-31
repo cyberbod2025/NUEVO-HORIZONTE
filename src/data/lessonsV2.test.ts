@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { LESSONS_V2 } from './lessonsV2';
 
 describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
-  it('define exactamente las 3 lecciones piloto de referencia', () => {
-    expect(LESSONS_V2).toHaveLength(3);
+  it('define las 6 lecciones piloto (3 fundamentos + 3 JS moderno/async)', () => {
+    expect(LESSONS_V2).toHaveLength(6);
   });
 
-  it('tiene ids únicos y orden secuencial 1, 2, 3', () => {
+  it('tiene ids únicos y orden secuencial 1 a 6', () => {
     const ids = LESSONS_V2.map((lesson) => lesson.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3]);
+    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6]);
   });
 
   it('cada lección declara schemaVersion 2 y los campos mínimos del contrato', () => {
@@ -73,5 +73,27 @@ describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
     expect(funcionEvaluadora.prerequisiteLessonIds).toEqual(
       expect.arrayContaining([variables.id, condicionales.id]),
     );
+  });
+
+  it('las 3 lecciones de JS moderno/async encadenan sus prerrequisitos en orden (4 -> 5 -> 6)', () => {
+    const arrowDestructuring = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-js-arrow-destructuring');
+    const promesas = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-js-promesas');
+    const asyncAwait = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-js-async-await');
+
+    expect(promesas?.prerequisiteLessonIds).toEqual([arrowDestructuring?.id]);
+    expect(asyncAwait?.prerequisiteLessonIds).toEqual([promesas?.id]);
+  });
+
+  it('la lección de promesas cubre los 3 estados y no depende de fetch real (sin red en las pruebas)', () => {
+    const promesas = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-js-promesas');
+    expect(promesas?.challenge.starterCode).toContain('new Promise');
+    expect(promesas?.challenge.checks.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('la lección de async/await exige manejar tanto éxito como error (try/catch real)', () => {
+    const asyncAwait = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-js-async-await');
+    const checkLabels = asyncAwait?.challenge.checks.map((check) => check.label) ?? [];
+    expect(checkLabels.some((label) => label.includes('cargado'))).toBe(true);
+    expect(checkLabels.some((label) => label.toLowerCase().includes('error'))).toBe(true);
   });
 });

@@ -149,3 +149,24 @@ describe('LessonView — lecciones v2 nativas', () => {
     expect(screen.getByText('¿Ya domino esto?')).toBeInTheDocument();
   });
 });
+
+describe('LessonView — migración de seguimiento (JS moderno/async)', () => {
+  const arrowDestructuring = normalizeLesson(
+    LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-js-arrow-destructuring')!,
+  );
+
+  it('renderiza la lección de arrow functions/destructuring con sus 4 pasos guiados', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={arrowDestructuring}
+        lessonStage="guided"
+        guidedStepIndex={0}
+        sandboxCode={arrowDestructuring.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText(`Paso 1 de ${arrowDestructuring.guidedPractice.length}`)).toBeInTheDocument();
+    expect(arrowDestructuring.guidedPractice).toHaveLength(4);
+  });
+});

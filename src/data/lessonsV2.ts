@@ -1,14 +1,17 @@
-import { Brain, Code, Sliders } from 'lucide-react';
+import { Braces, Brain, Code, Globe, Sliders, Zap } from 'lucide-react';
 import type { LessonV2 } from '../types/lesson';
 
 /**
  * Piloto vertical del contrato v2 (ver docs/adr/0004-lesson-v2-pedagogical-contract.md).
  *
- * Tres lecciones reales, no de relleno, que demuestran la progresión
- * Comprender -> Aplicar -> Resolver de manera autónoma sobre el mismo tema
- * (condicionales y variables), profundizando lo que hoy es un único módulo con
- * una sola pregunta. No sustituyen `MODULES`; conviven con él mientras se valida
- * el contrato antes de migrar el resto del currículo.
+ * Lecciones reales, no de relleno, que demuestran la progresión
+ * Comprender -> Aplicar -> Resolver de manera autónoma. Las 3 primeras cubren
+ * variables/condicionales/funciones (territorio del módulo 1 legacy); las 3
+ * siguientes (agregadas en la microtarea de seguimiento) cubren JS moderno y
+ * asincronía (territorio del módulo 2 legacy: arrow functions, destructuring,
+ * template literals, promesas, async/await y fetch). No sustituyen `MODULES`;
+ * conviven con él mientras se valida el contrato antes de migrar el resto del
+ * currículo.
  */
 export const LESSONS_V2: LessonV2[] = [
   {
@@ -394,6 +397,337 @@ export const LESSONS_V2: LessonV2[] = [
       'Usé && para exigir que dos condiciones se cumplan a la vez en una regla real.',
       'Cuando un caso de prueba falló, identifiqué CUÁL de las dos condiciones estaba mal, no solo que "algo" fallaba.',
       'Puedo explicar, en una frase, la diferencia entre "aprobar por nota" y "aprobar por nota Y asistencia".',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-js-arrow-destructuring',
+    moduleId: 'mod-2-v2',
+    phaseId: 'fase-1',
+    order: 4,
+    title: 'V2.4 Arrow functions, destructuring y template literals: escribir JS moderno legible',
+    category: 'JavaScript',
+    summary: 'Reescribe funciones y accesos a objetos con la sintaxis que vas a ver en el 90% del código moderno.',
+    prerequisiteLessonIds: ['lesson-v2-fundamentos-funcion-evaluadora'],
+    estimatedMinutes: 45,
+    xpReward: 90,
+    icon: Braces,
+    color: 'from-yellow-400 to-amber-500',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Reescribir una función tradicional como arrow function y saber cuándo NO conviene hacerlo.',
+      'Extraer valores de objetos con destructuring en vez de acceder propiedad por propiedad.',
+      'Construir texto con template literals en vez de concatenación con +.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Una arrow function (`const suma = (a, b) => a + b;`) es una forma más corta de escribir una función. El destructuring (`const { nombre, nota } = alumno;`) extrae valores de un objeto directamente en variables, sin repetir `alumno.nombre` en cada línea. Los template literals (`` `Hola ${nombre}` ``) insertan variables dentro de un texto sin concatenar con `+`.',
+      whyItMattersMarkdown:
+        'Este trío es la sintaxis que vas a ver en el 90% del código JavaScript/React moderno que leas o escribas de aquí en adelante. Si no la lees con fluidez, cada línea de un proyecto real te va a tomar el triple de tiempo entender.',
+      realWorldContextMarkdown:
+        'Cuando en el Módulo 5 (React) veas `const { nombre, calificacion } = props;` al inicio de un componente, es exactamente el mismo destructuring que practicas aquí, solo que extrayendo de `props` en vez de un objeto cualquiera.',
+      narrationText:
+        'Arrow functions, destructuring y template literals son la sintaxis corta que domina el JavaScript moderno. Aprender a leerlas de corrido es la base para todo lo que sigue.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-arrow',
+        title: 'De función tradicional a arrow function',
+        code: 'function sumar(a, b) {\n  return a + b;\n}\nconst sumarCorta = (a, b) => a + b;\nconsole.log(sumar(2, 3), sumarCorta(2, 3));',
+        explanationMarkdown:
+          'Ambas hacen lo mismo. La arrow function con una sola expresión de retorno no necesita ni `{ }` ni `return`: el valor después de `=>` se retorna automáticamente.',
+      },
+      {
+        id: 'ejemplo-destructuring',
+        title: 'Destructuring de un objeto',
+        code: 'const alumno = { nombre: "Karla", nota: 9, grupo: "2B" };\nconst { nombre, nota } = alumno;\nconsole.log(`${nombre} tiene ${nota}`);',
+        explanationMarkdown:
+          'En vez de escribir `alumno.nombre` y `alumno.nota`, los extraemos una sola vez y usamos los nombres directamente. `grupo` se queda sin extraer porque no lo necesitamos.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué imprime este código?',
+        codeSnippet: 'const doble = (n) => n * 2;\nconsole.log(doble(5));',
+        options: ['10', '5', 'n * 2', 'Error'],
+        correctAnswer: '10',
+        hints: ['La arrow function retorna automáticamente el resultado de la expresión.', 'doble(5) sustituye n por 5: 5 * 2.'],
+        explanationMarkdown: 'Como es una arrow function de una sola expresión, `n * 2` se retorna sin necesidad de escribir `return`.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué valor tiene la variable `ciudad` después de este código?',
+        codeSnippet: 'const escuela = { nombre: "Secundaria 12", ciudad: "Puebla", turno: "matutino" };\nconst { ciudad } = escuela;',
+        options: ['"Puebla"', '"Secundaria 12"', '"matutino"', 'undefined'],
+        correctAnswer: '"Puebla"',
+        hints: ['El nombre entre llaves debe coincidir EXACTAMENTE con la propiedad del objeto que quieres extraer.'],
+        explanationMarkdown: '`{ ciudad }` extrae la propiedad `ciudad` del objeto `escuela` y la guarda en una variable con el mismo nombre.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: '¿Cuál de estas dos líneas usa un template literal?',
+        codeSnippet: 'let nombre = "Iván";\n// A: console.log("Hola " + nombre + "!");\n// B: console.log(`Hola ${nombre}!`);',
+        options: [
+          'Solo B es un template literal, aunque A también funciona',
+          'Solo A funciona, B tiene un error',
+          'Ninguna funciona',
+          'Ambas son template literals',
+        ],
+        correctAnswer: 'Solo B es un template literal, aunque A también funciona',
+        hints: ['Un template literal usa backticks (comillas invertidas) y `${ }`, no comillas normales con +.'],
+        explanationMarkdown:
+          'A es concatenación clásica con `+` (válida pero más verbosa). B es un template literal: usa backticks y `${variable}` para insertar el valor directamente.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: 'Este código tiene un bug de destructuring. ¿Cuál es?',
+        codeSnippet: 'const alumno = { nombre: "Diana", promedio: 8.5 };\nconst { Nombre, promedio } = alumno;\nconsole.log(Nombre);',
+        options: [
+          'El nombre de la propiedad debe coincidir exactamente: es "nombre", no "Nombre" (JS distingue mayúsculas)',
+          'No se puede hacer destructuring de dos propiedades a la vez',
+          'Falta el operador +',
+          'El código no tiene ningún error',
+        ],
+        correctAnswer: 'El nombre de la propiedad debe coincidir exactamente: es "nombre", no "Nombre" (JS distingue mayúsculas)',
+        hints: ['JavaScript distingue mayúsculas de minúsculas en los nombres.', 'La propiedad real en el objeto es `nombre` en minúsculas.'],
+        explanationMarkdown:
+          '`Nombre` (con mayúscula) no existe en el objeto, así que su valor es `undefined`. El destructuring debe coincidir exactamente con el nombre de la propiedad, letra por letra.',
+      },
+    ],
+    challenge: {
+      id: 'reto-arrow-destructuring',
+      promptMarkdown:
+        'Completa `resumenAlumno` usando el destructuring que ya viene en el parámetro y un template literal para el resultado. No uses concatenación con +.',
+      starterCode:
+        'function resumenAlumno({ nombre, nota, grupo }) {\n  // Retorna: "<nombre> (grupo <grupo>): <nota>"\n  return "";\n}\n\nconsole.log(resumenAlumno({ nombre: "Emilia", nota: 9, grupo: "3A" }));\nconsole.log(resumenAlumno({ nombre: "Bruno", nota: 6, grupo: "1C" }));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-emilia', type: 'stdoutIncludes', label: 'Emilia (grupo 3A): 9', value: 'Emilia (grupo 3A): 9', failureMessage: 'Revisa el caso de Emilia: falta construir el texto exacto con el template literal.' },
+        { id: 'check-bruno', type: 'stdoutIncludes', label: 'Bruno (grupo 1C): 6', value: 'Bruno (grupo 1C): 6', failureMessage: 'Revisa el caso de Bruno: la función debe funcionar para cualquier alumno.' },
+      ],
+      hints: [
+        'El parámetro ya viene destructurado: usa nombre, nota y grupo directamente, no `alumno.nombre`.',
+        'Usa un template literal: `${nombre} (grupo ${grupo}): ${nota}`.',
+      ],
+      expectedEvidenceMarkdown: 'La consola debe mostrar "Emilia (grupo 3A): 9" y "Bruno (grupo 1C): 6".',
+    },
+    reflectionPromptMarkdown:
+      'Busca, mentalmente o en algún ejemplo de código que hayas visto, una línea que use + para construir un texto con variables. ¿Cómo se vería con template literals?',
+    masteryCriteria: [
+      'Puedo convertir una función tradicional corta en arrow function y viceversa.',
+      'Extraigo valores de un objeto con destructuring en vez de acceder propiedad por propiedad.',
+      'Uso template literals en vez de concatenar con +.',
+      'Detecto cuándo un destructuring falla por un nombre de propiedad que no coincide exactamente.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-js-promesas',
+    moduleId: 'mod-2-v2',
+    phaseId: 'fase-1',
+    order: 5,
+    title: 'V2.5 Promesas: modelar una tarea que tarda',
+    category: 'JavaScript',
+    summary: 'Entiende los 3 estados de una Promesa y predice cuándo se ejecuta .then() o .catch().',
+    prerequisiteLessonIds: ['lesson-v2-js-arrow-destructuring'],
+    estimatedMinutes: 50,
+    xpReward: 100,
+    icon: Zap,
+    color: 'from-pink-500 to-rose-600',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar qué representa una Promesa y sus tres estados (pending, fulfilled, rejected).',
+      'Leer una cadena .then()/.catch() y predecir el orden en que se ejecuta.',
+      'Reconocer cuándo una tarea es asíncrona en la vida real, no solo en código.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Una Promesa es un objeto que representa el resultado de una tarea que TODAVÍA no terminó, pero que eventualmente terminará. Empieza en estado `pending`. Cuando la tarea termina bien, pasa a `fulfilled` y ejecuta lo que pusiste en `.then()`. Si falla, pasa a `rejected` y ejecuta `.catch()`.',
+      whyItMattersMarkdown:
+        'Cualquier operación que dependa de algo externo y lento (pedir datos a un servidor, leer un archivo, esperar una base de datos) no puede resolverse al instante. Si JavaScript se quedara congelado esperando, toda la página dejaría de responder. Las promesas son el mecanismo para decir "sigue haciendo otras cosas, y avísame cuando esto termine".',
+      realWorldContextMarkdown:
+        'Cuando SASE guarda una calificación, el navegador manda esa información al servidor y espera la confirmación: ese "esperar sin congelar la pantalla" es, por dentro, una Promesa. Si se rechaza (se cayó la conexión), el `.catch()` es lo que le muestra al profesor un error en vez de dejarlo pensando que sí se guardó.',
+      narrationText:
+        'Una promesa representa una tarea que todavía no termina. Pasa de pendiente a cumplida o rechazada, y then/catch reaccionan a cada caso.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-resuelta',
+        title: 'Una promesa que se resuelve',
+        code: 'const tareaLenta = new Promise((resolve) => {\n  resolve("Calificación guardada");\n});\ntareaLenta.then((resultado) => console.log(resultado));',
+        explanationMarkdown: '`resolve(...)` marca la promesa como cumplida con ese valor. `.then()` recibe ese valor cuando la promesa se resuelve.',
+      },
+      {
+        id: 'ejemplo-catch',
+        title: 'Encadenar y manejar el error',
+        code: 'function guardarNota(nota) {\n  return new Promise((resolve, reject) => {\n    if (nota >= 0 && nota <= 10) resolve("Nota guardada: " + nota);\n    else reject("Nota fuera de rango");\n  });\n}\nguardarNota(15)\n  .then((msg) => console.log(msg))\n  .catch((err) => console.log("Error:", err));',
+        explanationMarkdown: 'Como 15 no es una nota válida, la promesa se rechaza y el `.catch()` es el que se ejecuta, no el `.then()`.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Cuál es el estado de una promesa recién creada, antes de que termine su tarea?',
+        options: ['pending', 'fulfilled', 'rejected', 'completed'],
+        correctAnswer: 'pending',
+        hints: ['pending significa "pendiente", ni éxito ni error todavía.'],
+        explanationMarkdown: 'Toda promesa empieza en `pending` hasta que se llama a `resolve` (pasa a fulfilled) o `reject` (pasa a rejected).',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué imprime este código?',
+        codeSnippet: 'Promise.resolve("listo").then((valor) => console.log(valor.toUpperCase()));',
+        options: ['LISTO', 'listo', 'Error', 'undefined'],
+        correctAnswer: 'LISTO',
+        hints: ['`Promise.resolve(...)` crea una promesa ya cumplida con ese valor.', '.then() recibe "listo" y le aplica toUpperCase().'],
+        explanationMarkdown: '`Promise.resolve("listo")` se cumple de inmediato con el valor "listo"; `.then` lo recibe y `toUpperCase()` lo pone en mayúsculas.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: '¿Qué bloque se ejecuta en este código?',
+        codeSnippet:
+          'function verificarEdad(edad) {\n  return new Promise((resolve, reject) => {\n    if (edad >= 18) resolve("Acceso permitido");\n    else reject("Acceso denegado: menor de edad");\n  });\n}\nverificarEdad(15).then((m) => console.log(m)).catch((e) => console.log(e));',
+        options: ['.catch(), porque 15 no cumple la condición', '.then(), porque la promesa siempre se cumple', 'Ambos bloques se ejecutan', 'Ninguno, porque falta await'],
+        correctAnswer: '.catch(), porque 15 no cumple la condición',
+        hints: ['15 >= 18 es false, así que entra al else.'],
+        explanationMarkdown: 'Como 15 no es mayor o igual a 18, se llama a `reject`, y solo el `.catch()` se ejecuta.',
+      },
+    ],
+    challenge: {
+      id: 'reto-promesas',
+      promptMarkdown:
+        'Completa `verificarAsistenciaMinima(diasAsistidos)`: debe devolver una Promesa que se resuelve con "Asistencia suficiente" si diasAsistidos >= 40, o se rechaza con "Asistencia insuficiente" si no.',
+      starterCode:
+        'function verificarAsistenciaMinima(diasAsistidos) {\n  return new Promise((resolve, reject) => {\n    // Completa la lógica aquí\n  });\n}\n\nverificarAsistenciaMinima(45).then((m) => console.log(m)).catch((e) => console.log(e));\nverificarAsistenciaMinima(20).then((m) => console.log(m)).catch((e) => console.log(e));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-suficiente', type: 'stdoutIncludes', label: '45 días -> Asistencia suficiente', value: 'Asistencia suficiente', failureMessage: 'Con 45 días de asistencia, la promesa debería resolverse con "Asistencia suficiente".' },
+        { id: 'check-insuficiente', type: 'stdoutIncludes', label: '20 días -> Asistencia insuficiente', value: 'Asistencia insuficiente', failureMessage: 'Con 20 días de asistencia, la promesa debería rechazarse con "Asistencia insuficiente".' },
+      ],
+      hints: ['Usa un if/else dentro de la función que le pasas a `new Promise`.', 'resolve(...) para el caso que cumple; reject(...) para el que no.'],
+      expectedEvidenceMarkdown: 'La consola debe mostrar "Asistencia suficiente" (45 días) y "Asistencia insuficiente" (20 días, vía catch).',
+    },
+    reflectionPromptMarkdown:
+      'Piensa en una app que uses seguido (banco, redes sociales, correo). ¿Qué acción tuya dispara ahí una tarea que "tarda" y que la app tiene que esperar sin congelarse?',
+    masteryCriteria: [
+      'Explico los 3 estados de una promesa con mis propias palabras.',
+      'Predigo si un .then() o un .catch() se ejecutará dado el código de una promesa.',
+      'Escribí una función que retorna una promesa con resolve/reject según una condición.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-js-async-await',
+    moduleId: 'mod-2-v2',
+    phaseId: 'fase-1',
+    order: 6,
+    title: 'V2.6 async/await y fetch: consumir una API real sin bloquear la pantalla',
+    category: 'JavaScript',
+    summary: 'Reescribe promesas encadenadas como async/await y maneja errores de red con try/catch.',
+    prerequisiteLessonIds: ['lesson-v2-js-promesas'],
+    estimatedMinutes: 55,
+    xpReward: 110,
+    icon: Globe,
+    color: 'from-indigo-500 to-purple-600',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Reescribir una cadena .then()/.catch() usando async/await.',
+      'Usar try/catch para manejar errores en código async/await.',
+      'Explicar qué hace fetch() y por qué su resultado hay que esperarlo dos veces (respuesta y luego .json()).',
+    ],
+    concept: {
+      explanationMarkdown:
+        '`async/await` es una forma más legible de trabajar con promesas: en vez de encadenar `.then()`, escribes el código como si fuera secuencial. Una función marcada `async` siempre retorna una promesa; dentro de ella, `await` pausa SOLO esa función (no toda la app) hasta que la promesa se resuelva o se rechace.',
+      whyItMattersMarkdown:
+        'Casi todo el código que trae datos de un servidor (login, cargar calificaciones, guardar una incidencia) se escribe hoy con async/await, no con `.then()` encadenados. Si no lo dominas, no puedes leer ni escribir la mayoría del código de un backend o frontend conectado a una API.',
+      realWorldContextMarkdown:
+        '`fetch("/api/sase/alumnos")` es exactamente cómo el navegador le pediría al servidor la lista de alumnos de SASE. La respuesta llega en dos pasos: primero los encabezados (`await fetch(...)`), y luego el cuerpo en formato JSON (`await respuesta.json()`); por eso siempre ves dos `await` seguidos en este patrón.',
+      narrationText:
+        'Async/await hace que el código asíncrono se lea de arriba hacia abajo, como código normal. Try/catch maneja los errores cuando la red o el servidor fallan.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-then-vs-async',
+        title: 'De .then() a async/await',
+        code: '// Con .then()\nfunction cargarDatosThen() {\n  return fetch("/api/datos").then((r) => r.json());\n}\n\n// Con async/await (mismo resultado)\nasync function cargarDatosAwait() {\n  const r = await fetch("/api/datos");\n  return await r.json();\n}',
+        explanationMarkdown: 'Ambas funciones hacen lo mismo. `async/await` se lee de arriba hacia abajo como código normal, sin anidar callbacks.',
+      },
+      {
+        id: 'ejemplo-try-catch',
+        title: 'Manejo de errores con try/catch',
+        code: 'async function cargarAlumno(id) {\n  try {\n    const respuesta = await fetch(`/api/alumnos/${id}`);\n    const datos = await respuesta.json();\n    console.log("Alumno cargado:", datos.nombre);\n  } catch (error) {\n    console.log("No se pudo cargar el alumno:", error.message);\n  }\n}',
+        explanationMarkdown: 'Si `fetch` o `.json()` fallan (sin internet, servidor caído), el `catch` captura el error en vez de tronar toda la aplicación.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué palabra clave pausa la ejecución de una función async hasta que la promesa se resuelva?',
+        codeSnippet: 'async function cargar() {\n  const datos = ___ obtenerDatos();\n}',
+        options: ['await', 'then', 'pause', 'defer'],
+        correctAnswer: 'await',
+        hints: ['Es la misma palabra que da nombre al patrón "async/await".'],
+        explanationMarkdown: '`await` pausa la función async (sin bloquear el resto de la app) hasta que la promesa se resuelve.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué tipo de función SIEMPRE retorna una promesa, aunque dentro tengas un `return` normal?',
+        options: ['Una función async', 'Una función normal (sin async)', 'Una arrow function', 'Ninguna'],
+        correctAnswer: 'Una función async',
+        hints: ['Por eso puedes usar `.then()` sobre el resultado de CUALQUIER función async.'],
+        explanationMarkdown: 'Toda función declarada con `async` envuelve automáticamente su valor de retorno en una promesa.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'Este código tiene un bug: si fetch falla, la app truena sin avisar nada útil. ¿Qué le falta?',
+        codeSnippet: 'async function cargarNotas() {\n  const respuesta = await fetch("/api/notas");\n  const datos = await respuesta.json();\n  console.log(datos);\n}',
+        options: ['Un bloque try/catch alrededor de los await', 'Un segundo await extra', 'Cambiar fetch por .then()', 'El código no tiene ningún error'],
+        correctAnswer: 'Un bloque try/catch alrededor de los await',
+        hints: ['Sin try/catch, un error dentro de una función async se pierde silenciosamente o rompe la promesa sin control.'],
+        explanationMarkdown: 'Envolver los `await` en un `try { ... } catch (error) { ... }` permite reaccionar de forma controlada si la red falla o el servidor responde con error.',
+      },
+    ],
+    challenge: {
+      id: 'reto-async-await',
+      promptMarkdown:
+        'Completa `cargarPerfilAlumno(id)` con async/await y try/catch: si `obtenerAlumno(id)` tiene éxito, imprime "Perfil cargado: <nombre>"; si lanza un error, imprime "Error al cargar perfil: <mensaje>". No cambies `obtenerAlumno`.',
+      starterCode:
+        'function obtenerAlumno(id) {\n  return new Promise((resolve, reject) => {\n    if (id === 1) resolve({ nombre: "Renata" });\n    else reject(new Error("Alumno no encontrado"));\n  });\n}\n\nasync function cargarPerfilAlumno(id) {\n  // Usa await + try/catch aquí\n}\n\ncargarPerfilAlumno(1);\ncargarPerfilAlumno(99);',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-exito', type: 'stdoutIncludes', label: 'Perfil cargado: Renata', value: 'Perfil cargado: Renata', failureMessage: 'Para id 1, obtenerAlumno se resuelve: deberías imprimir "Perfil cargado: Renata".' },
+        { id: 'check-error', type: 'stdoutIncludes', label: 'Error al cargar perfil: Alumno no encontrado', value: 'Error al cargar perfil: Alumno no encontrado', failureMessage: 'Para id 99, obtenerAlumno se rechaza: tu catch debe imprimir "Error al cargar perfil: Alumno no encontrado".' },
+      ],
+      hints: [
+        'Dentro de un try, usa `const alumno = await obtenerAlumno(id);` y luego construye el mensaje con alumno.nombre.',
+        'En el catch, el parámetro error trae `error.message` con el texto exacto.',
+      ],
+      expectedEvidenceMarkdown: 'La consola debe mostrar "Perfil cargado: Renata" y "Error al cargar perfil: Alumno no encontrado".',
+    },
+    reflectionPromptMarkdown:
+      'Compara mentalmente el ejemplo con .then() y el mismo código con async/await de esta lección. ¿Cuál se te hace más fácil de leer de corrido, de arriba hacia abajo? Anota por qué.',
+    masteryCriteria: [
+      'Convierto una cadena .then()/.catch() a su equivalente con async/await.',
+      'Uso try/catch para manejar errores dentro de una función async.',
+      'Explico por qué fetch() necesita dos await seguidos (respuesta y luego .json()).',
+      'Escribí una función async completa que maneja tanto el caso de éxito como el de error.',
     ],
   },
 ];

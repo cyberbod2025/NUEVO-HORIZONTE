@@ -47,6 +47,16 @@ No se usa Zod ni ninguna librería de validación de esquema: TypeScript (`stric
 - `npm audit`: 0 vulnerabilidades.
 - `npx playwright install chromium` / `npm run test:e2e`: **bloqueado por la política de red del entorno de verificación** (`cdn.playwright.dev` fuera de la lista blanca), no por el código. El flujo e2e existente (`e2e/onboarding.spec.ts`) depende de las cadenas literales `'Editor de Código JS / Sandbox'`, `'Ejecutar Código'`, `'3. Autónomo (70/30)'` y `'¡Módulo Superado! Has ganado +100 XP.'`; las tres primeras se preservaron sin cambios en `LessonView.tsx`, y la última se generó dinámicamente como `` `Has ganado +${lesson.xpReward} XP.` `` — para el módulo 1 (`xpReward: 100` por el adaptador) produce el mismo texto exacto. Pendiente: correr `npm run test:e2e` en un entorno con acceso de red para confirmarlo de forma directa (ver siguiente microtarea recomendada en el reporte final).
 
+## Update — seguimiento del mismo día (módulo 2)
+
+Tras validar el contrato y el piloto de 3 lecciones, se migró el territorio del módulo 2 legacy (JavaScript Moderno & Asincronía) a 3 lecciones v2 más, en el mismo `src/data/lessonsV2.ts` y sin cambios de código en `LessonView`/`TimelineView` (la sección "Piloto v2" y el adaptador ya eran genéricos sobre el tamaño del arreglo):
+
+4. `lesson-v2-js-arrow-destructuring` — arrow functions, destructuring, template literals (4 pasos guiados).
+5. `lesson-v2-js-promesas` — estados de una Promesa, `.then()`/`.catch()` (3 pasos guiados).
+6. `lesson-v2-js-async-await` — async/await, try/catch, patrón `fetch` (3 pasos guiados).
+
+`prerequisiteLessonIds` encadena 4→5→6 y 3→4, manteniendo la progresión Comprender→Aplicar→Resolver también entre lecciones de distintos temas. El módulo 2 legacy en `curriculum.ts` sigue sin tocarse. Verificación repetida completa (`tsc`, `vitest --coverage`, `build`, `audit`) en verde; ver el reporte de esta iteración para el detalle exacto de comandos y resultados.
+
 ## Alternatives considered
 
 - Migrar los 12 módulos completos al contrato v2 de una vez: rechazado para esta iteración por alcance explícito (riesgo alto, sin validación previa del contrato con contenido real).
