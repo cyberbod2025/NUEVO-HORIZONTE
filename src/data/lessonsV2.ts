@@ -1,4 +1,4 @@
-import { ArrowUp, Boxes, Braces, Brain, Code, FileCode, GitBranch, GitCommit, Globe, Layers, Puzzle, RefreshCw, Server, Sliders, Terminal, Zap } from 'lucide-react';
+import { ArrowUp, Boxes, Braces, Brain, Code, Database, FileCode, GitBranch, GitCommit, Globe, Layers, Lock, Puzzle, RefreshCw, Server, Sliders, Terminal, Zap } from 'lucide-react';
 import type { LessonV2 } from '../types/lesson';
 
 /**
@@ -14,7 +14,9 @@ import type { LessonV2 } from '../types/lesson';
  * esencial (territorio del módulo 4 legacy); las 3 siguientes cubren React
  * esencial (territorio del módulo 5 legacy); y las 3 últimas cubren backend
  * con Node.js y Express (territorio del módulo 6 legacy: HTTP y REST, rutas
- * Express y CRUD). El sandbox solo corre JavaScript (ver
+ * Express y CRUD); y las 3 últimas cubren bases de datos con SQL, Postgres y
+ * Supabase (territorio del módulo 7 legacy: sintaxis SQL, relaciones entre
+ * tablas y Row Level Security). El sandbox solo corre JavaScript (ver
  * `src/features/sandbox/`), así que los retos que dependen de herramientas,
  * TypeScript, React o Node/Express simulan en JS puro su comportamiento
  * observable, siguiendo el patrón de los módulos legacy. No sustituyen
@@ -2305,6 +2307,345 @@ export const LESSONS_V2: LessonV2[] = [
       'Explico qué representa :id y cómo llega al controlador.',
       'Distingo la ruta HTTP del controlador que ejecuta la lógica.',
       'Escribí una función que ejecuta operaciones CRUD sobre un recurso en memoria y maneja ids inexistentes.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-db-sql-basico',
+    moduleId: 'mod-7-v2',
+    phaseId: 'fase-2',
+    order: 19,
+    title: 'V2.19 SQL básico: SELECT, WHERE e INSERT',
+    category: 'Databases',
+    summary: 'Lee y escribe consultas SQL simples sobre una tabla: seleccionar columnas, filtrar filas e insertar registros.',
+    prerequisiteLessonIds: ['lesson-v2-backend-api-crud'],
+    estimatedMinutes: 40,
+    xpReward: 90,
+    icon: Database,
+    color: 'from-teal-500 to-emerald-700',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Escribir un `SELECT` con columnas específicas y una cláusula `WHERE`.',
+      'Distinguir cuándo usar `SELECT` frente a `INSERT INTO`.',
+      'Leer el resultado de una consulta como una tabla de filas y columnas.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'SQL es el lenguaje para leer y escribir datos en una base de datos relacional. `SELECT columnas FROM tabla WHERE condicion` lee filas que cumplen una condición; `SELECT *` lee todas las columnas. `INSERT INTO tabla (columnas) VALUES (valores)` agrega una fila nueva.',
+      whyItMattersMarkdown:
+        'Casi cualquier backend real (incluido Supabase, que corre sobre PostgreSQL) termina traduciendo las peticiones HTTP en consultas SQL. Sin poder leer una consulta, no puedes verificar qué datos expone o modifica un endpoint.',
+      realWorldContextMarkdown:
+        'En SASE, cuando el frontend pide las calificaciones de un alumno, el backend ejecuta algo como `SELECT materia, nota FROM calificaciones WHERE alumno_id = 1`. Cuando un profesor captura una nota nueva, ejecuta un `INSERT INTO calificaciones (...)`.',
+      narrationText:
+        'SQL es el lenguaje para leer y escribir datos en una tabla. SELECT lee filas que cumplen una condición. INSERT INTO agrega una fila nueva.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-select-where',
+        title: 'Filtrar filas con WHERE',
+        code:
+          'SELECT nombre, promedio FROM alumnos WHERE promedio >= 8;\n\n-- Devuelve solo las filas donde promedio es 8 o más,\n-- mostrando únicamente las columnas nombre y promedio.',
+        explanationMarkdown:
+          '`WHERE` filtra qué filas se incluyen en el resultado; la lista después de `SELECT` decide qué columnas se muestran.',
+      },
+      {
+        id: 'ejemplo-insert',
+        title: 'Agregar una fila nueva',
+        code:
+          'INSERT INTO alumnos (nombre, promedio)\nVALUES (\'Marco\', 9.2);\n\n-- Crea una fila nueva en la tabla alumnos\n-- con esos dos valores.',
+        explanationMarkdown:
+          'El orden de las columnas en `(nombre, promedio)` debe coincidir con el orden de los valores en `VALUES (...)`.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: 'Quieres leer únicamente el nombre y el correo de todos los alumnos. ¿Qué instrucción usas?',
+        codeSnippet: '______ nombre, correo FROM alumnos;',
+        options: ['SELECT', 'INSERT', 'WHERE', 'FROM'],
+        correctAnswer: 'SELECT',
+        hints: ['Es la instrucción que lee datos de una tabla.'],
+        explanationMarkdown: '`SELECT` seguido de columnas específicas lee solo esas columnas, no toda la fila.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: 'Quieres solo los alumnos cuyo `promedio` es menor a 6. ¿Qué cláusula agregas?',
+        codeSnippet: 'SELECT * FROM alumnos ______ promedio < 6;',
+        options: ['WHERE', 'SELECT', 'INSERT INTO', 'VALUES'],
+        correctAnswer: 'WHERE',
+        hints: ['Es la cláusula que filtra filas según una condición.'],
+        explanationMarkdown: '`WHERE promedio < 6` limita el resultado a las filas que cumplen esa condición.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'Quieres agregar un alumno nuevo a la tabla. ¿Qué instrucción usas?',
+        options: ['INSERT INTO', 'SELECT', 'WHERE', 'DELETE'],
+        correctAnswer: 'INSERT INTO',
+        hints: ['Es la instrucción que crea una fila nueva, no la que lee.'],
+        explanationMarkdown: '`INSERT INTO tabla (...) VALUES (...)` agrega una fila nueva a la tabla.',
+      },
+    ],
+    challenge: {
+      id: 'reto-sql-basico',
+      promptMarkdown:
+        'Completa `ejecutarSQL(tipo, tabla, condicion)` para que simule el texto de una consulta SQL según el tipo de operación.',
+      starterCode:
+        'function ejecutarSQL(tipo, tabla, condicion) {\n  // tipo "select-todo"   -> `SELECT * FROM <tabla>`\n  // tipo "select-filtro"  -> `SELECT * FROM <tabla> WHERE <condicion>`\n  // tipo "insert"         -> `INSERT INTO <tabla> VALUES (<condicion>)`\n  return "";\n}\n\nconsole.log(ejecutarSQL("select-todo", "alumnos", null));\nconsole.log(ejecutarSQL("select-filtro", "alumnos", "promedio >= 8"));\nconsole.log(ejecutarSQL("insert", "alumnos", "\'Marco\', 9.2"));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-select-todo', type: 'stdoutIncludes', label: 'SELECT * FROM alumnos', value: 'SELECT * FROM alumnos', failureMessage: '"select-todo" debe construir un SELECT sin WHERE sobre la tabla dada.' },
+        { id: 'check-select-filtro', type: 'stdoutIncludes', label: 'SELECT * FROM alumnos WHERE promedio >= 8', value: 'SELECT * FROM alumnos WHERE promedio >= 8', failureMessage: '"select-filtro" debe agregar la cláusula WHERE con la condición recibida.' },
+        { id: 'check-insert', type: 'stdoutIncludes', label: 'INSERT INTO alumnos VALUES (\'Marco\', 9.2)', value: "INSERT INTO alumnos VALUES ('Marco', 9.2)", failureMessage: '"insert" debe construir un INSERT INTO con los valores recibidos entre paréntesis.' },
+      ],
+      hints: [
+        'Usa template literals para construir cada cadena de salida.',
+        'El caso "select-todo" no debe incluir la palabra WHERE en ningún lado.',
+        'El caso "insert" envuelve `condicion` entre paréntesis después de VALUES.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar tres líneas: el SELECT sin filtro, el SELECT con WHERE y el INSERT INTO con los valores de Marco.',
+    },
+    reflectionPromptMarkdown:
+      'Piensa en una lista que consultas seguido en tu trabajo (asistencias, calificaciones). ¿Qué columnas pedirías con SELECT y qué condición pondrías en WHERE?',
+    masteryCriteria: [
+      'Escribo un SELECT con columnas específicas y una cláusula WHERE.',
+      'Distingo cuándo usar SELECT frente a INSERT INTO.',
+      'Leo el resultado de una consulta como filas y columnas.',
+      'Escribí una función que construye el texto de tres tipos de consulta SQL.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-db-relaciones',
+    moduleId: 'mod-7-v2',
+    phaseId: 'fase-2',
+    order: 20,
+    title: 'V2.20 Tablas relacionadas: claves foráneas y JOIN conceptual',
+    category: 'Databases',
+    summary: 'Entiende cómo dos tablas se relacionan mediante una clave foránea y qué hace un JOIN al combinarlas.',
+    prerequisiteLessonIds: ['lesson-v2-db-sql-basico'],
+    estimatedMinutes: 40,
+    xpReward: 90,
+    icon: Database,
+    color: 'from-teal-500 to-emerald-700',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar qué es una clave foránea y qué relación describe entre dos tablas.',
+      'Predecir el resultado de combinar dos tablas relacionadas por su clave foránea.',
+      'Reconocer cuándo un dato debería vivir en su propia tabla en vez de repetirse.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Una base de datos relacional separa la información en tablas para no repetirla. Una **clave foránea** es una columna en una tabla que guarda el id de una fila de otra tabla, y así las conecta. Un `JOIN` combina filas de dos tablas relacionadas usando esa clave.',
+      whyItMattersMarkdown:
+        'Si guardaras el nombre completo del alumno en cada fila de calificaciones, un cambio de nombre requeriría actualizar cientos de filas. Con una clave foránea, el nombre vive una sola vez en `alumnos` y todo lo demás solo referencia su id.',
+      realWorldContextMarkdown:
+        'En SASE, la tabla `calificaciones` no repite el nombre del alumno: guarda `alumno_id`, una clave foránea hacia `alumnos`. Para mostrar "Valeria: 9.5" en la pantalla, el backend combina ambas tablas por ese id.',
+      narrationText:
+        'Una clave foránea conecta una fila de una tabla con una fila de otra. Un JOIN combina ambas tablas usando esa conexión.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-clave-foranea',
+        title: 'Dos tablas conectadas por un id',
+        code:
+          'alumnos:      { id: 1, nombre: "Valeria" }\ncalificaciones: { id: 10, alumno_id: 1, materia: "Mate", nota: 9.5 }\n\n-- alumno_id es la clave foránea:\n-- apunta al id de una fila en alumnos.',
+        explanationMarkdown:
+          '`alumno_id` no repite el nombre; solo guarda el id de la fila correspondiente en `alumnos`. La conexión se resuelve al combinar ambas tablas.',
+      },
+      {
+        id: 'ejemplo-join-conceptual',
+        title: 'Qué hace un JOIN',
+        code:
+          'SELECT alumnos.nombre, calificaciones.materia, calificaciones.nota\nFROM calificaciones\nJOIN alumnos ON calificaciones.alumno_id = alumnos.id;\n\n-- Resultado: "Valeria | Mate | 9.5"',
+        explanationMarkdown:
+          'El `JOIN` empareja cada fila de `calificaciones` con la fila de `alumnos` cuyo `id` coincide con `alumno_id`, y el resultado combina columnas de ambas tablas.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: 'La tabla `calificaciones` tiene una columna `alumno_id` que apunta al `id` de un alumno. ¿Cómo se llama ese tipo de columna?',
+        options: ['Clave foránea', 'Clave primaria', 'Índice', 'Vista'],
+        correctAnswer: 'Clave foránea',
+        hints: ['Es la columna que conecta una tabla con otra, no la que identifica de forma única a la propia fila.'],
+        explanationMarkdown: 'Una clave foránea guarda el id de una fila de otra tabla, estableciendo la relación entre ambas.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: 'Quieres una tabla que combine el nombre del alumno con cada una de sus calificaciones. ¿Qué operación SQL usas?',
+        options: ['JOIN', 'INSERT', 'WHERE', 'DELETE'],
+        correctAnswer: 'JOIN',
+        hints: ['Es la operación que combina filas de dos tablas relacionadas.'],
+        explanationMarkdown: '`JOIN` combina filas de dos tablas usando la clave foránea como punto de conexión.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'Guardas el nombre completo del alumno en cada fila de calificaciones, repetido muchas veces. ¿Qué problema causa esto?',
+        options: ['Un cambio de nombre requiere actualizar todas las filas repetidas', 'La consulta se vuelve más rápida', 'No se necesita clave foránea', 'No causa ningún problema'],
+        correctAnswer: 'Un cambio de nombre requiere actualizar todas las filas repetidas',
+        hints: ['Piensa qué pasa si el alumno corrige su nombre y hay 50 calificaciones guardadas.'],
+        explanationMarkdown: 'Repetir datos que pueden cambiar obliga a actualizarlos en todos los lugares donde se repitieron; una clave foránea evita ese problema.',
+      },
+    ],
+    challenge: {
+      id: 'reto-join-conceptual',
+      promptMarkdown:
+        'Completa `combinarTablas(alumnos, calificaciones)` para que devuelva un arreglo de strings `"<nombre>: <materia> <nota>"`, uno por cada calificación, resolviendo `alumno_id` contra la tabla `alumnos` (simula un JOIN).',
+      starterCode:
+        'function combinarTablas(alumnos, calificaciones) {\n  // Por cada calificación, busca en alumnos el que tenga id === alumno_id\n  // y arma "<nombre>: <materia> <nota>"\n  return [];\n}\n\nconst alumnos = [\n  { id: 1, nombre: "Valeria" },\n  { id: 2, nombre: "Sofía" },\n];\nconst calificaciones = [\n  { alumno_id: 1, materia: "Mate", nota: 9.5 },\n  { alumno_id: 2, materia: "Historia", nota: 8 },\n  { alumno_id: 1, materia: "Ciencias", nota: 10 },\n];\n\nconsole.log(combinarTablas(alumnos, calificaciones).join("\\n"));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-fila-1', type: 'stdoutIncludes', label: 'Valeria: Mate 9.5', value: 'Valeria: Mate 9.5', failureMessage: 'La primera calificación (alumno_id 1, Mate) debe resolverse a "Valeria: Mate 9.5".' },
+        { id: 'check-fila-2', type: 'stdoutIncludes', label: 'Sofía: Historia 8', value: 'Sofía: Historia 8', failureMessage: 'La segunda calificación (alumno_id 2, Historia) debe resolverse a "Sofía: Historia 8".' },
+        { id: 'check-fila-3', type: 'stdoutIncludes', label: 'Valeria: Ciencias 10', value: 'Valeria: Ciencias 10', failureMessage: 'La tercera calificación (alumno_id 1, Ciencias) debe resolverse a "Valeria: Ciencias 10".' },
+      ],
+      hints: [
+        'Usa `.map()` sobre `calificaciones` y, dentro, `.find()` sobre `alumnos` para localizar el nombre.',
+        'La clave que conecta ambas tablas es `alumno_id` (en calificaciones) contra `id` (en alumnos).',
+        'Arma cada string con un template literal: `${alumno.nombre}: ${calificacion.materia} ${calificacion.nota}`.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar tres líneas, una por calificación, con el nombre del alumno correcto resuelto desde la tabla `alumnos`.',
+    },
+    reflectionPromptMarkdown:
+      'En tu trabajo, ¿qué dos listas separadas (por ejemplo alumnos y asistencias) tendrías que combinar para responder "¿cuántas faltas tiene Valeria?"? ¿Qué columna las conectaría?',
+    masteryCriteria: [
+      'Explico qué es una clave foránea y qué relación describe.',
+      'Predigo el resultado de combinar dos tablas relacionadas.',
+      'Reconozco cuándo un dato debería vivir en su propia tabla en vez de repetirse.',
+      'Escribí una función que simula un JOIN resolviendo una clave foránea contra otra tabla.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-db-supabase-rls',
+    moduleId: 'mod-7-v2',
+    phaseId: 'fase-2',
+    order: 21,
+    title: 'V2.21 Supabase y Row Level Security',
+    category: 'Databases',
+    summary: 'Usa el cliente de Supabase para leer datos y entiende qué protege una política de Row Level Security.',
+    prerequisiteLessonIds: ['lesson-v2-db-relaciones'],
+    estimatedMinutes: 40,
+    xpReward: 90,
+    icon: Lock,
+    color: 'from-teal-500 to-emerald-700',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Leer una consulta encadenada del cliente de Supabase (`from`, `select`, `eq`) y saber qué SQL representa.',
+      'Explicar qué es Row Level Security (RLS) y qué problema resuelve.',
+      'Reconocer cuándo una tabla sin RLS es un riesgo de seguridad, no solo un detalle técnico.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Supabase es un backend-as-a-service que expone una base de datos PostgreSQL a través de un cliente JavaScript: `supabase.from("tabla").select("columnas").eq("campo", valor)` arma, por debajo, una consulta SQL equivalente a `SELECT columnas FROM tabla WHERE campo = valor`. Row Level Security (RLS) es un conjunto de reglas que Postgres aplica **por fila**, decidiendo qué filas puede ver o modificar cada usuario según quién está autenticado.',
+      whyItMattersMarkdown:
+        'Sin RLS, cualquier persona con la URL pública del proyecto podría leer o modificar filas de otros usuarios. RLS mueve esa protección a la base de datos misma, no solo al código del frontend, que un usuario podría manipular.',
+      realWorldContextMarkdown:
+        'En SASE, una política de RLS en `calificaciones` podría decir "un alumno solo puede leer filas donde `alumno_id` sea igual a su propio id de sesión" — así, aunque dos alumnos usen el mismo cliente Supabase, cada uno solo ve lo suyo.',
+      narrationText:
+        'El cliente de Supabase arma consultas SQL con from, select y eq. Row Level Security decide, fila por fila, qué puede ver o modificar cada usuario dentro de la base de datos.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-cliente-supabase',
+        title: 'El cliente traduce a SQL por debajo',
+        code:
+          'supabase\n  .from("calificaciones")\n  .select("materia, nota")\n  .eq("alumno_id", 1);\n\n-- Equivale a:\n-- SELECT materia, nota FROM calificaciones WHERE alumno_id = 1;',
+        explanationMarkdown:
+          'Cada método encadenado corresponde a una parte de la consulta SQL: `from` es la tabla, `select` las columnas, `eq` el filtro de igualdad en `WHERE`.',
+      },
+      {
+        id: 'ejemplo-rls',
+        title: 'Sin RLS vs. con RLS',
+        code:
+          '-- Sin RLS: cualquiera con la URL pública puede leer TODAS las filas.\n\n-- Con RLS activo y una política:\n-- "el usuario solo ve filas donde alumno_id = auth.uid()"\n-- la misma consulta SOLO devuelve las filas del alumno autenticado.',
+        explanationMarkdown:
+          'La política de RLS no cambia el código del cliente; cambia qué filas devuelve Postgres para ese usuario específico, sin importar qué pida el cliente.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '`supabase.from("alumnos").select("nombre").eq("id", 3)` es equivalente a qué SQL?',
+        options: [
+          'SELECT nombre FROM alumnos WHERE id = 3',
+          'INSERT INTO alumnos (nombre) VALUES (3)',
+          'SELECT * FROM alumnos',
+          'DELETE FROM alumnos WHERE id = 3',
+        ],
+        correctAnswer: 'SELECT nombre FROM alumnos WHERE id = 3',
+        hints: ['`from` es la tabla, `select` las columnas, `eq` el filtro de igualdad.'],
+        explanationMarkdown: 'El encadenamiento `from/select/eq` arma un SELECT con columnas específicas y una condición WHERE de igualdad.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué decide una política de Row Level Security?',
+        options: [
+          'Qué filas puede ver o modificar cada usuario',
+          'Qué tan rápido responde una consulta',
+          'Qué columnas existen en la tabla',
+          'Cuántas tablas tiene la base de datos',
+        ],
+        correctAnswer: 'Qué filas puede ver o modificar cada usuario',
+        hints: ['El nombre lo dice: seguridad a nivel de fila.'],
+        explanationMarkdown: 'RLS aplica reglas por fila dentro de la base de datos, independientes de lo que pida el código del cliente.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'Una tabla de calificaciones queda pública, sin ninguna política de RLS activada. ¿Qué riesgo real describe mejor esta situación?',
+        options: [
+          'Cualquiera con la URL pública podría leer las calificaciones de todos los alumnos',
+          'La tabla dejaría de aceptar nuevas filas',
+          'Las consultas SQL dejarían de funcionar',
+          'No hay ningún riesgo si la URL no se comparte',
+        ],
+        correctAnswer: 'Cualquiera con la URL pública podría leer las calificaciones de todos los alumnos',
+        hints: ['RLS es la única capa dentro de la base de datos que restringe por fila; sin ella, la clave pública del proyecto es suficiente para leer todo.'],
+        explanationMarkdown: 'Sin RLS, la clave pública (`anon key`) del proyecto es suficiente para leer o escribir cualquier fila de una tabla expuesta, sin importar de quién sean los datos.',
+      },
+    ],
+    challenge: {
+      id: 'reto-rls-simulado',
+      promptMarkdown:
+        'Completa `leerConRLS(filas, usuarioId, rlsActivo)` para simular cómo Row Level Security filtra el resultado de una consulta.',
+      starterCode:
+        'function leerConRLS(filas, usuarioId, rlsActivo) {\n  // Si rlsActivo es false, devuelve TODAS las filas (sin protección).\n  // Si rlsActivo es true, devuelve solo las filas donde fila.alumno_id === usuarioId.\n  return [];\n}\n\nconst calificaciones = [\n  { alumno_id: 1, materia: "Mate", nota: 9.5 },\n  { alumno_id: 2, materia: "Historia", nota: 8 },\n  { alumno_id: 1, materia: "Ciencias", nota: 10 },\n];\n\nconsole.log("Sin RLS:", leerConRLS(calificaciones, 1, false).length);\nconsole.log("Con RLS:", leerConRLS(calificaciones, 1, true).length);',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-sin-rls', type: 'stdoutIncludes', label: 'Sin RLS: 3', value: 'Sin RLS: 3', failureMessage: 'Con rlsActivo en false, deben devolverse las 3 filas sin ningún filtro.' },
+        { id: 'check-con-rls', type: 'stdoutIncludes', label: 'Con RLS: 2', value: 'Con RLS: 2', failureMessage: 'Con rlsActivo en true y usuarioId 1, solo deben contarse las 2 filas donde alumno_id es 1.' },
+      ],
+      hints: [
+        'Si `rlsActivo` es false, retorna `filas` tal cual, sin filtrar.',
+        'Si `rlsActivo` es true, usa `.filter()` comparando `fila.alumno_id` contra `usuarioId`.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar "Sin RLS: 3" (todas las filas) y "Con RLS: 2" (solo las del usuario 1).',
+    },
+    reflectionPromptMarkdown:
+      'Si SASE guardara las calificaciones en Supabase sin RLS, ¿qué política escribirías primero y para qué tabla? Descríbela en una frase, sin código.',
+    masteryCriteria: [
+      'Leo una consulta encadenada del cliente de Supabase y sé qué SQL representa.',
+      'Explico qué es Row Level Security y qué problema resuelve.',
+      'Reconozco por qué una tabla sin RLS es un riesgo de seguridad real, no un detalle menor.',
+      'Escribí una función que simula cómo RLS filtra filas según el usuario y si la política está activa.',
     ],
   },
 ];

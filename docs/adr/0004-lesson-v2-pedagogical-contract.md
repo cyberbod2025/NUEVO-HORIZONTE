@@ -116,6 +116,20 @@ El sandbox solo ejecuta JavaScript en un Worker, no un proceso Node ni un servid
 
 Evidencia de esta iteración: `npx tsc --noEmit` sin errores, `npx vitest run --coverage` con **65 pruebas en 6 archivos** (antes 59) y `lessonsV2.ts` al 100 % de cobertura, y `npm run build` exitoso. El build conserva la advertencia preexistente de tamaño de chunks de Monaco; no introduce un error de compilación.
 
+## Update — seguimiento (módulo 7)
+
+Se migró el territorio del módulo 7 legacy (Bases de Datos: SQL, Postgres & Supabase) a 3 lecciones v2 más, en `src/data/lessonsV2.ts`, sin tocar `curriculum.ts`, `LessonView`, `TimelineView` ni `lessonAdapter.ts`:
+
+19. `lesson-v2-db-sql-basico` — `SELECT`/`WHERE`/`INSERT INTO`, distinguir lectura de escritura (3 pasos guiados).
+20. `lesson-v2-db-relaciones` — claves foráneas y `JOIN` conceptual entre dos tablas relacionadas (3 pasos guiados).
+21. `lesson-v2-db-supabase-rls` — cliente de Supabase (`from`/`select`/`eq`) como equivalente de una consulta SQL, y qué protege una política de Row Level Security (3 pasos guiados).
+
+Nota de alcance importante: esta lección **enseña el concepto de Supabase y RLS como contenido curricular** (simulado en JS puro, sin conexión real), no abre el frente de infraestructura Supabase para la propia app. D-005 sigue vigente: no hay cliente de Supabase real, credenciales ni backend configurados en el producto — solo currículo sobre SQL/Postgres/RLS, igual que el módulo 6 enseñó HTTP/Express sin levantar un servidor real.
+
+`prerequisiteLessonIds` encadena 19→20→21; la lección 19 depende de `lesson-v2-backend-api-crud` (lección 18). Así se conserva una sola cadena secuencial a lo largo de las 21 lecciones v2. El módulo 7 legacy permanece intacto en `curriculum.ts`, conforme a D-005.
+
+Evidencia de esta iteración: `npx tsc --noEmit` sin errores, `npx vitest run --coverage` con **70 pruebas en 6 archivos** (antes 65), y `npm run build` exitoso. El build conserva la advertencia preexistente de tamaño de chunks de Monaco; no introduce un error de compilación.
+
 ## Alternatives considered
 
 - Migrar los 12 módulos completos al contrato v2 de una vez: rechazado para esta iteración por alcance explícito (riesgo alto, sin validación previa del contrato con contenido real).

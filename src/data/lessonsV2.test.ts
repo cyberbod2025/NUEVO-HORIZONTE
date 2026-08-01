@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { LESSONS_V2 } from './lessonsV2';
 
 describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
-  it('define las 18 lecciones piloto que cubren los módulos legacy 1 a 6', () => {
-    expect(LESSONS_V2).toHaveLength(18);
+  it('define las 21 lecciones piloto que cubren los módulos legacy 1 a 7', () => {
+    expect(LESSONS_V2).toHaveLength(21);
   });
 
-  it('tiene ids únicos y orden secuencial 1 a 18', () => {
+  it('tiene ids únicos y orden secuencial 1 a 21', () => {
     const ids = LESSONS_V2.map((lesson) => lesson.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]);
   });
 
   it('cada lección declara schemaVersion 2 y los campos mínimos del contrato', () => {
@@ -253,5 +253,52 @@ describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
       'Alumno 1 actualizado: Valeria Ruiz',
       'Alumno 2 eliminado',
     ]));
+  });
+
+  it('las 3 lecciones de bases de datos encadenan sus prerrequisitos en orden (19 -> 20 -> 21), continuando desde Backend', () => {
+    const apiCrud = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-backend-api-crud');
+    const sqlBasico = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-db-sql-basico');
+    const relaciones = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-db-relaciones');
+    const supabaseRls = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-db-supabase-rls');
+
+    expect(sqlBasico?.moduleId).toBe('mod-7-v2');
+    expect(relaciones?.moduleId).toBe('mod-7-v2');
+    expect(supabaseRls?.moduleId).toBe('mod-7-v2');
+    expect(sqlBasico?.prerequisiteLessonIds).toEqual([apiCrud?.id]);
+    expect(relaciones?.prerequisiteLessonIds).toEqual([sqlBasico?.id]);
+    expect(supabaseRls?.prerequisiteLessonIds).toEqual([relaciones?.id]);
+  });
+
+  it('la lección de SQL básico distingue SELECT sin filtro, SELECT con WHERE e INSERT INTO', () => {
+    const sqlBasico = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-db-sql-basico');
+    const checkValues = sqlBasico?.challenge.checks.map((check) => check.value) ?? [];
+
+    expect(checkValues).toEqual(expect.arrayContaining([
+      'SELECT * FROM alumnos',
+      'SELECT * FROM alumnos WHERE promedio >= 8',
+      "INSERT INTO alumnos VALUES ('Marco', 9.2)",
+    ]));
+  });
+
+  it('la lección de relaciones simula un JOIN resolviendo alumno_id contra la tabla de alumnos', () => {
+    const relaciones = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-db-relaciones');
+    expect(relaciones?.challenge.starterCode).toContain('alumno_id');
+    const checkValues = relaciones?.challenge.checks.map((check) => check.value) ?? [];
+    expect(checkValues).toEqual(expect.arrayContaining(['Valeria: Mate 9.5', 'Sofía: Historia 8', 'Valeria: Ciencias 10']));
+  });
+
+  it('la lección de Supabase/RLS verifica el comportamiento con y sin la política activa, no solo el caso feliz', () => {
+    const supabaseRls = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-db-supabase-rls');
+    const checkValues = supabaseRls?.challenge.checks.map((check) => check.value) ?? [];
+    expect(checkValues).toEqual(expect.arrayContaining(['Sin RLS: 3', 'Con RLS: 2']));
+    expect(supabaseRls?.reflectionPromptMarkdown.toLowerCase()).toContain('rls');
+  });
+
+  it('ninguna de las 3 lecciones de bases de datos requiere una conexión Postgres/Supabase real: solo simulan en JS', () => {
+    const idsDb = ['lesson-v2-db-sql-basico', 'lesson-v2-db-relaciones', 'lesson-v2-db-supabase-rls'];
+    for (const id of idsDb) {
+      const lesson = LESSONS_V2.find((l) => l.id === id);
+      expect(lesson?.challenge.language).toBe('javascript');
+    }
   });
 });
