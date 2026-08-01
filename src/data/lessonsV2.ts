@@ -1,4 +1,4 @@
-import { ArrowUp, Boxes, Braces, Brain, Code, Database, FileCode, GitBranch, GitCommit, Globe, Layers, Lock, Puzzle, RefreshCw, Server, Sliders, Terminal, Zap } from 'lucide-react';
+import { ArrowUp, Boxes, Braces, Brain, Code, Database, FileCode, GitBranch, GitCommit, Globe, Layers, Lock, Puzzle, RefreshCw, Server, ShieldCheck, Sliders, Terminal, Zap } from 'lucide-react';
 import type { LessonV2 } from '../types/lesson';
 
 /**
@@ -12,11 +12,13 @@ import type { LessonV2 } from '../types/lesson';
  * fetch); las 3 siguientes cubren terminal, Git y Conventional Commits
  * (territorio del módulo 3 legacy); las 3 siguientes cubren TypeScript
  * esencial (territorio del módulo 4 legacy); las 3 siguientes cubren React
- * esencial (territorio del módulo 5 legacy); y las 3 últimas cubren backend
+ * esencial (territorio del módulo 5 legacy); las 3 siguientes cubren backend
  * con Node.js y Express (territorio del módulo 6 legacy: HTTP y REST, rutas
- * Express y CRUD); y las 3 últimas cubren bases de datos con SQL, Postgres y
+ * Express y CRUD); las 3 siguientes cubren bases de datos con SQL, Postgres y
  * Supabase (territorio del módulo 7 legacy: sintaxis SQL, relaciones entre
- * tablas y Row Level Security). El sandbox solo corre JavaScript (ver
+ * tablas y Row Level Security); y las 3 últimas cubren pruebas automatizadas
+ * (territorio del módulo 8 legacy: Arrange-Act-Assert, casos límite, mocks y
+ * React Testing Library). El sandbox solo corre JavaScript (ver
  * `src/features/sandbox/`), así que los retos que dependen de herramientas,
  * TypeScript, React o Node/Express simulan en JS puro su comportamiento
  * observable, siguiendo el patrón de los módulos legacy. No sustituyen
@@ -2646,6 +2648,395 @@ export const LESSONS_V2: LessonV2[] = [
       'Explico qué es Row Level Security y qué problema resuelve.',
       'Reconozco por qué una tabla sin RLS es un riesgo de seguridad real, no un detalle menor.',
       'Escribí una función que simula cómo RLS filtra filas según el usuario y si la política está activa.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-testing-aaa',
+    moduleId: 'mod-8-v2',
+    phaseId: 'fase-3',
+    order: 22,
+    title: 'V2.22 Pruebas unitarias: Arrange, Act, Assert',
+    category: 'Testing',
+    summary: 'Verifica una función pequeña con casos concretos y estructura cada prueba para que el fallo sea legible.',
+    prerequisiteLessonIds: ['lesson-v2-db-supabase-rls'],
+    estimatedMinutes: 40,
+    xpReward: 90,
+    icon: ShieldCheck,
+    color: 'from-purple-500 to-indigo-600',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar qué verifica una prueba unitaria y qué no le corresponde verificar.',
+      'Organizar una prueba en Arrange, Act y Assert.',
+      'Usar `expect(...).toBe(...)` para comparar valores primitivos exactos.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Una prueba unitaria verifica el comportamiento de una unidad pequeña de código, normalmente una función, con datos conocidos. El patrón **Arrange, Act, Assert** evita pruebas confusas: Arrange prepara datos y dependencias; Act ejecuta la función; Assert compara el resultado real contra el esperado. En Vitest, `expect(valorReal).toBe(valorEsperado)` comprueba igualdad estricta para valores primitivos.',
+      whyItMattersMarkdown:
+        'Una prueba no demuestra que el programa sea perfecto; deja una alarma concreta para que un cambio futuro no rompa un comportamiento que ya funcionaba. Cuando falla, el nombre del caso y la diferencia entre esperado y recibido reducen el tiempo de diagnóstico.',
+      realWorldContextMarkdown:
+        'En SASE, antes de mostrar si un alumno acredita, una prueba puede fijar que una nota de 6 exacto sí aprueba. Si alguien cambia por accidente `>= 6` a `> 6`, la prueba falla antes de que esa regla incorrecta llegue a una boleta real.',
+      narrationText:
+        'Una prueba unitaria prepara datos, ejecuta una función y compara el resultado con lo esperado. Arrange prepara, Act ejecuta y Assert verifica.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-aaa',
+        title: 'Una prueba ordenada con Arrange, Act y Assert',
+        code:
+          'import { expect, test } from "vitest";\n\nfunction esAprobatoria(nota) {\n  return nota >= 6;\n}\n\ntest("una nota de 6 acredita", () => {\n  // Arrange\n  const nota = 6;\n  // Act\n  const resultado = esAprobatoria(nota);\n  // Assert\n  expect(resultado).toBe(true);\n});',
+        explanationMarkdown:
+          'Cada sección tiene una responsabilidad. Si el caso falla, se sabe que la regla aplicada a una nota de 6 ya no produce el resultado esperado.',
+      },
+      {
+        id: 'ejemplo-to-be',
+        title: 'toBe para valores primitivos',
+        code:
+          'test("calcula el promedio", () => {\n  expect(calcularPromedio([10, 8, 9])).toBe(9);\n});',
+        explanationMarkdown:
+          '`toBe` compara con igualdad estricta (`===`), adecuada para números, textos y booleanos. Para objetos o arreglos se usa otra aserción, como `toEqual`.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué parte del patrón AAA prepara los datos de entrada y las dependencias del caso?',
+        options: ['Arrange', 'Act', 'Assert', 'Mock'],
+        correctAnswer: 'Arrange',
+        hints: ['Es la primera palabra del patrón Arrange, Act, Assert.', 'Aquí creas las variables que usará la función.'],
+        explanationMarkdown: 'Arrange prepara el escenario: valores de entrada, objetos y dependencias controladas.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿En qué parte llamas a la función cuyo comportamiento quieres verificar?',
+        options: ['Act', 'Arrange', 'Assert', 'Describe'],
+        correctAnswer: 'Act',
+        hints: ['Es el verbo que representa ejecutar la acción bajo prueba.'],
+        explanationMarkdown: 'Act ejecuta la unidad bajo prueba y produce el valor real que luego compararás.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: '¿Qué aserción de Vitest compara dos números primitivos con igualdad estricta?',
+        codeSnippet: 'expect(calcularPromedio([10, 8, 9])).____(9);',
+        options: ['toBe', 'toEqualText', 'assert', 'isEqual'],
+        correctAnswer: 'toBe',
+        hints: ['Es la aserción usada en el módulo legacy para valores primitivos.'],
+        explanationMarkdown: '`toBe` verifica que el valor real y el esperado sean estrictamente iguales.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: 'Una prueba falla porque recibió `false` cuando esperaba `true`. ¿Qué información útil aporta?',
+        options: [
+          'El comportamiento real ya no coincide con la regla esperada y hay que revisar el caso',
+          'La aplicación debe borrarse y reescribirse',
+          'La prueba no sirve y debe eliminarse sin revisar',
+          'El usuario siempre escribió mal el dato',
+        ],
+        correctAnswer: 'El comportamiento real ya no coincide con la regla esperada y hay que revisar el caso',
+        hints: ['Una falla es evidencia para investigar, no una sentencia sobre quién tuvo la culpa.'],
+        explanationMarkdown: 'El fallo identifica un desacuerdo concreto entre lo esperado y lo que el código produjo; primero se revisan la regla y el caso.',
+      },
+    ],
+    challenge: {
+      id: 'reto-testing-aaa',
+      promptMarkdown:
+        'Completa `probarCaso(nombre, valorReal, valorEsperado)` para simular el Assert de una prueba. Debe reportar PASS cuando los valores son estrictamente iguales y FAIL cuando no lo son.',
+      starterCode:
+        'function probarCaso(nombre, valorReal, valorEsperado) {\n  // Si valorReal === valorEsperado, retorna: "PASS: <nombre>"\n  // Si no, retorna: "FAIL: <nombre> (esperado <valorEsperado>, recibido <valorReal>)"\n  return "";\n}\n\nfunction calcularPromedio(notas) {\n  return notas.reduce((a, b) => a + b, 0) / notas.length;\n}\n\nfunction esAprobatoria(nota) {\n  return nota >= 6;\n}\n\nconsole.log(probarCaso("promedio exacto", calcularPromedio([10, 8, 9]), 9));\nconsole.log(probarCaso("limite aprobatorio", esAprobatoria(6), true));\nconsole.log(probarCaso("caso que falla", esAprobatoria(5), true));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-pass-promedio', type: 'stdoutIncludes', label: 'PASS del promedio', value: 'PASS: promedio exacto', failureMessage: 'El promedio de 10, 8 y 9 es 9, así que el primer caso debe reportar PASS.' },
+        { id: 'check-pass-limite', type: 'stdoutIncludes', label: 'PASS del límite aprobatorio', value: 'PASS: limite aprobatorio', failureMessage: 'Una nota de 6 sí acredita; el segundo caso debe reportar PASS.' },
+        { id: 'check-fail-explicito', type: 'stdoutIncludes', label: 'FAIL con esperado y recibido', value: 'FAIL: caso que falla (esperado true, recibido false)', failureMessage: 'El tercer caso está diseñado para fallar: el reporte debe mostrar el nombre, el valor esperado y el valor recibido.' },
+      ],
+      hints: [
+        'Compara `valorReal === valorEsperado` antes de construir el mensaje.',
+        'Usa un template literal para incluir nombre, esperado y recibido.',
+        'El tercer caso debe producir FAIL: un runner útil también comunica fallos con claridad.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar dos PASS y un FAIL explicativo con "esperado true, recibido false". El FAIL final es evidencia de que el runner detecta una diferencia real.',
+    },
+    reflectionPromptMarkdown:
+      'Piensa en una regla de tu trabajo que tenga un límite exacto (asistencia mínima, calificación, fecha). ¿Qué valor probarías justo en el límite y qué resultado esperarías?',
+    masteryCriteria: [
+      'Explico qué comportamiento cubre una prueba unitaria pequeña.',
+      'Organizo un caso con Arrange, Act y Assert.',
+      'Uso toBe para comparar valores primitivos.',
+      'Leo un FAIL como evidencia de una diferencia entre esperado y recibido.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-testing-casos-limite',
+    moduleId: 'mod-8-v2',
+    phaseId: 'fase-3',
+    order: 23,
+    title: 'V2.23 Casos límite: detectar regresiones antes de producción',
+    category: 'Testing',
+    summary: 'Elige entradas que ejercitan límites, errores y casos normales en vez de probar solo el camino feliz.',
+    prerequisiteLessonIds: ['lesson-v2-testing-aaa'],
+    estimatedMinutes: 45,
+    xpReward: 100,
+    icon: ShieldCheck,
+    color: 'from-purple-500 to-indigo-600',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Distinguir un caso feliz de un caso límite y de un caso inválido.',
+      'Elegir valores exactamente en los bordes de una regla.',
+      'Explicar cómo una prueba evita que una corrección futura reintroduzca una regresión.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'El caso feliz verifica una entrada común que debería funcionar. Los **casos límite** prueban justo donde cambia una regla: 6 frente a 5.99, una lista vacía, el primer o último elemento. Los casos inválidos comprueban cómo responde el código ante datos que no debería aceptar. Una suite útil combina los tres; si solo pruebas el camino feliz, los bugs suelen sobrevivir en los bordes.',
+      whyItMattersMarkdown:
+        'La mayoría de las regresiones no rompen el ejemplo más obvio: rompen un valor exacto, una lista vacía o un error de red. Dejar esos casos escritos evita que alguien "arregle" otro comportamiento y vuelva a introducir un bug ya conocido.',
+      realWorldContextMarkdown:
+        'En SASE, una regla de acreditación debe probar 0, 5, 6, 10 y también notas fuera del rango 0–10. Probar solo una nota de 8 no detectaría que una nota de 6 exacto dejó de acreditar ni que una nota de 11 se guarda sin rechazo.',
+      narrationText:
+        'Los casos límite prueban donde una regla cambia de resultado. No basta con el caso feliz: hay que revisar valores exactos, entradas vacías e inválidas para prevenir regresiones.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-limite-aprobacion',
+        title: 'Una regla cambia justo en 6',
+        code:
+          'test("5 no acredita", () => expect(esAprobatoria(5)).toBe(false));\ntest("6 sí acredita", () => expect(esAprobatoria(6)).toBe(true));\ntest("10 sí acredita", () => expect(esAprobatoria(10)).toBe(true));',
+        explanationMarkdown:
+          'Los tres casos fijan el borde inferior y un valor alto válido. La prueba de 6 es la que detectaría un cambio accidental de `>=` a `>`.',
+      },
+      {
+        id: 'ejemplo-invalido',
+        title: 'No aceptar datos fuera del dominio',
+        code:
+          'test("11 se rechaza", () => {\n  expect(clasificarNota(11)).toBe("Error: nota fuera de rango");\n});',
+        explanationMarkdown:
+          'Una prueba también define cómo responde el sistema ante datos inválidos. Eso evita que la validación quede implícita o se pierda en una refactorización.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: 'Una regla acredita con nota mayor o igual a 6. ¿Cuál es el caso límite más importante?',
+        options: ['nota = 6', 'nota = 8', 'nota = 100', 'nota = "seis"'],
+        correctAnswer: 'nota = 6',
+        hints: ['El límite es el valor donde cambia de no acreditar a acreditar.'],
+        explanationMarkdown: 'Una nota de 6 exacto verifica que la comparación incluya el límite.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Cuál es un caso inválido para una calificación de 0 a 10?',
+        options: ['11', '8', '6', '0'],
+        correctAnswer: '11',
+        hints: ['El rango válido termina en 10.'],
+        explanationMarkdown: '11 queda fuera del dominio permitido y debe activar la validación, no clasificarse como si fuera una nota normal.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: '¿Qué riesgo queda si solo pruebas `esAprobatoria(8)`?',
+        options: [
+          'No sabes si el límite de 6 ni las entradas inválidas funcionan correctamente',
+          'La función queda probada para todos los números',
+          'Las pruebas se vuelven más rápidas',
+          'No hay riesgo porque 8 es una nota común',
+        ],
+        correctAnswer: 'No sabes si el límite de 6 ni las entradas inválidas funcionan correctamente',
+        hints: ['Una sola entrada no ejerce la frontera donde cambia la regla.'],
+        explanationMarkdown: 'El caso feliz confirma un camino; no reemplaza pruebas del borde ni de entradas inválidas.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: 'Después de corregir un bug de "6 no acredita", ¿por qué conviene dejar una prueba para nota 6?',
+        options: [
+          'Para que una modificación futura avise si vuelve a romper ese comportamiento',
+          'Para borrar la prueba cuando el código cambie',
+          'Porque las pruebas solo sirven el día que se escribe el bug',
+          'Para evitar probar las demás notas',
+        ],
+        correctAnswer: 'Para que una modificación futura avise si vuelve a romper ese comportamiento',
+        hints: ['Una regresión es un bug que ya se había corregido y vuelve a aparecer.'],
+        explanationMarkdown: 'Una prueba de regresión conserva la evidencia del comportamiento correcto y vigila que no vuelva a fallar.',
+      },
+    ],
+    challenge: {
+      id: 'reto-casos-limite',
+      promptMarkdown:
+        'Completa `clasificarNota(nota)` para manejar los límites de una regla escolar: rechaza notas fuera de 0–10, marca 0–5 como NO APROBADO y 6–10 como APROBADO.',
+      starterCode:
+        'function clasificarNota(nota) {\n  // Menor que 0 o mayor que 10 -> "Error: nota fuera de rango"\n  // De 0 a 5                 -> "NO APROBADO"\n  // De 6 a 10                -> "APROBADO"\n  return "";\n}\n\nconsole.log("-1 ->", clasificarNota(-1));\nconsole.log("0 ->", clasificarNota(0));\nconsole.log("5 ->", clasificarNota(5));\nconsole.log("6 ->", clasificarNota(6));\nconsole.log("10 ->", clasificarNota(10));\nconsole.log("11 ->", clasificarNota(11));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-menor-rango', type: 'stdoutIncludes', label: '-1 inválido', value: '-1 -> Error: nota fuera de rango', failureMessage: 'Una nota menor a 0 debe rechazarse antes de clasificarla.' },
+        { id: 'check-cero', type: 'stdoutIncludes', label: '0 -> NO APROBADO', value: '0 -> NO APROBADO', failureMessage: '0 está dentro del rango pero no acredita.' },
+        { id: 'check-cinco', type: 'stdoutIncludes', label: '5 -> NO APROBADO', value: '5 -> NO APROBADO', failureMessage: '5 aún no alcanza el límite de acreditación.' },
+        { id: 'check-seis', type: 'stdoutIncludes', label: '6 -> APROBADO', value: '6 -> APROBADO', failureMessage: '6 exacto es el límite y debe acreditar.' },
+        { id: 'check-diez', type: 'stdoutIncludes', label: '10 -> APROBADO', value: '10 -> APROBADO', failureMessage: '10 es válido y debe acreditar.' },
+        { id: 'check-mayor-rango', type: 'stdoutIncludes', label: '11 inválido', value: '11 -> Error: nota fuera de rango', failureMessage: 'Una nota mayor a 10 debe rechazarse antes de clasificarla.' },
+      ],
+      hints: [
+        'Valida primero los valores fuera de rango con `nota < 0 || nota > 10`.',
+        'Después de validar, basta preguntar si `nota >= 6` para separar los dos resultados restantes.',
+        'El orden importa: si clasificas antes de validar, 11 podría aparecer como APROBADO.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar errores para -1 y 11, NO APROBADO para 0 y 5, y APROBADO para 6 y 10. Esos seis casos cubren rangos inválidos, borde inferior, borde de acreditación y máximo válido.',
+    },
+    reflectionPromptMarkdown:
+      'Elige una regla que uses con rangos (asistencia, entrega, rúbrica). Escribe un caso feliz, un caso justo en el límite y un caso inválido que probarías antes de automatizarla.',
+    masteryCriteria: [
+      'Distingo casos felices, límites e inválidos.',
+      'Elijo entradas exactamente en los bordes de una regla.',
+      'Explico por qué una prueba de regresión permanece después de corregir un bug.',
+      'Escribí una función que cubre rangos inválidos y ambos lados del límite de acreditación.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-testing-mocks-rtl',
+    moduleId: 'mod-8-v2',
+    phaseId: 'fase-3',
+    order: 24,
+    title: 'V2.24 Mocks y RTL: probar sin depender de la red',
+    category: 'Testing',
+    summary: 'Aísla una dependencia externa con un mock y consulta una interfaz por el comportamiento accesible que ve el usuario.',
+    prerequisiteLessonIds: ['lesson-v2-testing-casos-limite'],
+    estimatedMinutes: 50,
+    xpReward: 110,
+    icon: ShieldCheck,
+    color: 'from-purple-500 to-indigo-600',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar qué dependencia reemplaza un mock y por qué una prueba no debe depender de red real.',
+      'Distinguir una consulta de React Testing Library por rol accesible de una inspección de implementación interna.',
+      'Probar tanto la respuesta exitosa como el error de una dependencia simulada.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Un **mock** reemplaza una dependencia externa, como una API, reloj o base de datos, por una versión controlada dentro de la prueba. Así puedes comprobar el comportamiento de tu función sin internet ni datos reales. React Testing Library (RTL) aplica la misma idea desde quien usa la pantalla: renderiza el componente y busca elementos por rol y nombre accesibles, por ejemplo `screen.getByRole("button", { name: "Guardar" })`, en vez de inspeccionar variables internas de React.',
+      whyItMattersMarkdown:
+        'Una prueba que depende de una API real falla por motivos que no tienen que ver con tu código: red caída, datos cambiantes o credenciales. Los mocks hacen el resultado repetible. Las consultas accesibles de RTL comprueban lo que un usuario puede encontrar e interactuar, no detalles frágiles de implementación.',
+      realWorldContextMarkdown:
+        'En SASE, al probar una pantalla de calificaciones no quieres que la suite guarde una nota de verdad ni que falle porque se cayó Supabase. Simulas una respuesta exitosa y un error; luego verificas que la pantalla muestre el nombre o un mensaje de error accesible.',
+      narrationText:
+        'Un mock reemplaza una dependencia externa por una respuesta controlada. RTL prueba la interfaz como la usa una persona, buscando roles y nombres accesibles en vez de detalles internos.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-mock-api',
+        title: 'Un mock controla una respuesta de API',
+        code:
+          'const clienteMock = {\n  obtenerAlumno: async () => ({ id: 1, nombre: "Valeria" }),\n};\n\nexpect(await cargarNombre(clienteMock, 1)).toBe("Cargado: Valeria");',
+        explanationMarkdown:
+          'La función recibe un cliente controlado por la prueba. No hay red, pero el caso sigue verificando qué hace `cargarNombre` cuando la dependencia responde bien.',
+      },
+      {
+        id: 'ejemplo-rtl-rol',
+        title: 'RTL consulta lo que una persona puede encontrar',
+        code:
+          'render(<FormularioCalificacion />);\nconst boton = screen.getByRole("button", { name: "Guardar" });\nexpect(boton).toBeInTheDocument();',
+        explanationMarkdown:
+          '`getByRole` busca un botón por su nombre accesible. La prueba no necesita saber si internamente el componente usa `useState`, una clase CSS o una estructura concreta de divs.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Por qué un test de una función que consulta una API debería usar un mock?',
+        options: [
+          'Para controlar la respuesta y no depender de red, credenciales ni datos cambiantes',
+          'Para hacer que la API real responda más rápido',
+          'Para borrar los errores del código',
+          'Porque los mocks despliegan la aplicación',
+        ],
+        correctAnswer: 'Para controlar la respuesta y no depender de red, credenciales ni datos cambiantes',
+        hints: ['Una prueba debe dar el mismo resultado aunque no haya internet.'],
+        explanationMarkdown: 'El mock elimina causas externas de falla y permite preparar con precisión éxito, error y datos límite.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: 'En RTL, ¿qué consulta representa mejor encontrar el botón que una persona llama "Guardar"?',
+        options: [
+          'screen.getByRole("button", { name: "Guardar" })',
+          'document.querySelector(".boton-azul")',
+          'componente.state.botonActivo',
+          'getByVariableInterna("guardar")',
+        ],
+        correctAnswer: 'screen.getByRole("button", { name: "Guardar" })',
+        hints: ['La consulta usa el rol semántico y el nombre accesible.'],
+        explanationMarkdown: '`getByRole` se alinea con cómo lectores de pantalla y usuarios identifican controles, y no depende de una clase CSS.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'Tu mock de API lanza "Sin conexión". ¿Qué caso debería cubrir también la prueba?',
+        options: [
+          'Que la función o interfaz muestre un error controlado',
+          'Solo el caso de éxito, para no ver el error',
+          'Que la prueba haga una llamada real de respaldo',
+          'Que se elimine el catch del código',
+        ],
+        correctAnswer: 'Que la función o interfaz muestre un error controlado',
+        hints: ['La red puede fallar en producción; ese comportamiento también es parte del contrato.'],
+        explanationMarkdown: 'Un mock permite provocar el error de forma repetible y comprobar que la aplicación responde de forma útil.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: '¿Qué detalle NO debería ser el objetivo principal de una prueba RTL?',
+        options: [
+          'La variable interna exacta usada por useState',
+          'Que el botón Guardar sea accesible',
+          'Que el mensaje de error aparezca para el usuario',
+          'Que un campo tenga su etiqueta visible',
+        ],
+        correctAnswer: 'La variable interna exacta usada por useState',
+        hints: ['RTL prioriza comportamiento observable, no la implementación interna.'],
+        explanationMarkdown: 'Una prueba puede seguir siendo válida aunque el componente cambie de useState a otro patrón, siempre que la interfaz conserve el mismo comportamiento accesible.',
+      },
+    ],
+    challenge: {
+      id: 'reto-mocks',
+      promptMarkdown:
+        'Completa `cargarNombre(cliente, id)` usando la dependencia que recibe como parámetro. Debe devolver un mensaje de éxito cuando el mock responde y un mensaje controlado cuando el mock lanza un error.',
+      starterCode:
+        'async function cargarNombre(cliente, id) {\n  // Intenta: const alumno = await cliente.obtenerAlumno(id)\n  // Si funciona, retorna: "Cargado: <nombre>"\n  // Si falla, retorna: "Error controlado: <mensaje>"\n  return "";\n}\n\nconst clienteExitoso = {\n  obtenerAlumno: async (id) => ({ id, nombre: "Valeria" }),\n};\n\nconst clienteConError = {\n  obtenerAlumno: async () => {\n    throw new Error("Sin conexión");\n  },\n};\n\ncargarNombre(clienteExitoso, 1).then((mensaje) => console.log(mensaje));\ncargarNombre(clienteConError, 2).then((mensaje) => console.log(mensaje));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-exito', type: 'stdoutIncludes', label: 'Mock exitoso -> Cargado: Valeria', value: 'Cargado: Valeria', failureMessage: 'Con clienteExitoso, la función debe leer alumno.nombre y retornar "Cargado: Valeria".' },
+        { id: 'check-error', type: 'stdoutIncludes', label: 'Mock con error -> mensaje controlado', value: 'Error controlado: Sin conexión', failureMessage: 'Con clienteConError, el catch debe convertir el error en "Error controlado: Sin conexión".' },
+      ],
+      hints: [
+        'Usa `try { ... } catch (error) { ... }` dentro de la función async.',
+        'En el try, espera `cliente.obtenerAlumno(id)` y usa `alumno.nombre`.',
+        'En el catch, el mensaje está en `error.message`.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar "Cargado: Valeria" y "Error controlado: Sin conexión". Ambos resultados vienen de mocks locales; no se hace ninguna petición de red.',
+    },
+    reflectionPromptMarkdown:
+      'Piensa en una pantalla que consume datos. ¿Qué respuesta exitosa y qué error simularías primero con un mock? Después, ¿qué botón, campo o mensaje buscarías con getByRole o getByLabelText?',
+    masteryCriteria: [
+      'Explico por qué un mock evita depender de una API o red real.',
+      'Uso una dependencia inyectada para probar éxito y error de forma controlada.',
+      'Elijo getByRole con nombre accesible para comprobar una interfaz con RTL.',
+      'Escribí una función async que maneja la respuesta y el error de un mock.',
     ],
   },
 ];

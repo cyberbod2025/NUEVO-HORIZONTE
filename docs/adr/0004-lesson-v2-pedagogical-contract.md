@@ -130,6 +130,20 @@ Nota de alcance importante: esta lección **enseña el concepto de Supabase y RL
 
 Evidencia de esta iteración: `npx tsc --noEmit` sin errores, `npx vitest run --coverage` con **70 pruebas en 6 archivos** (antes 65), y `npm run build` exitoso. El build conserva la advertencia preexistente de tamaño de chunks de Monaco; no introduce un error de compilación.
 
+## Update — seguimiento (módulo 8)
+
+Se migró el territorio del módulo 8 legacy (Pruebas Automatizadas con Vitest & RTL) a 3 lecciones v2 más, en `src/data/lessonsV2.ts`, sin tocar `curriculum.ts`, `LessonView`, `TimelineView` ni `lessonAdapter.ts`:
+
+22. `lesson-v2-testing-aaa` — prueba unitaria, patrón Arrange-Act-Assert, `expect(...).toBe(...)` y lectura de un FAIL (4 pasos guiados).
+23. `lesson-v2-testing-casos-limite` — caso feliz, valores límite, entradas inválidas y pruebas de regresión (4 pasos guiados).
+24. `lesson-v2-testing-mocks-rtl` — mocks de éxito/error y consultas accesibles de React Testing Library con `getByRole` (4 pasos guiados).
+
+El sandbox solo ejecuta JavaScript en un Worker: no instala Vitest, no carga React Testing Library, no renderiza JSX y no accede a la red. Los ejemplos muestran la sintaxis real de esas herramientas para enseñar a leerla; los retos ejecutables simulan un runner de aserciones, límites de una regla y una dependencia inyectada que responde o falla. Así se verifica el razonamiento de pruebas sin presentar esa simulación como una suite o interfaz React reales.
+
+`prerequisiteLessonIds` encadena 22→23→24; la lección 22 depende de `lesson-v2-db-supabase-rls` (lección 21). Así se conserva una sola cadena secuencial a lo largo de las 24 lecciones v2. El módulo 8 legacy permanece intacto en `curriculum.ts`, conforme a D-005.
+
+Evidencia de esta iteración: `npx tsc --noEmit` sin errores, `npx vitest run --coverage` con **74 pruebas en 6 archivos** (antes 70) y `lessonsV2.ts` al 100 % de cobertura, y `npm run build` exitoso. El build conserva la advertencia preexistente de tamaño de chunks de Monaco; no introduce un error de compilación.
+
 ## Alternatives considered
 
 - Migrar los 12 módulos completos al contrato v2 de una vez: rechazado para esta iteración por alcance explícito (riesgo alto, sin validación previa del contrato con contenido real).
