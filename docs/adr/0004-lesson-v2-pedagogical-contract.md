@@ -89,7 +89,18 @@ Se migró el territorio del módulo 5 legacy (React: Componentes, Props & useSta
 
 Restricción de diseño explícita: el sandbox del contrato v2 (igual que el del módulo 5 legacy) solo ejecuta JavaScript plano en un Worker, sin DOM ni transformación JSX — no hay forma de "renderizar" un componente React real. Las 3 lecciones simulan el comportamiento OBSERVABLE de props/useState/lifting-state-up con funciones y closures (`crearEstado`, `crearContador`, `crearPantallaCalificaciones`), el mismo patrón que ya validaron los módulos 3 (Git simulado) y 4 (TypeScript simulado con `typeof`). La prueba `lessonsV2.test.ts` ("ninguna de las 3 lecciones de React depende de un DOM/JSX real") deja esta restricción explícita y verificada, no solo documentada.
 
-`prerequisiteLessonIds` encadena 13→14→15, y la lección 13 depende de `lesson-v2-ts-funciones-genericos` (lección 12), preservando una sola cadena de desbloqueo secuencial a lo largo de las 15 lecciones piloto. El módulo 5 legacy en `curriculum.ts` sigue sin tocarse. Verificación completa (`tsc --noEmit`, `vitest run --coverage`, `npm run build`, `npm audit`) ejecutada de forma independiente (no solo confiando en el reporte previo): en verde, ver el reporte de esta iteración para el detalle exacto.
+`prerequisiteLessonIds` encadena 13→14→15, y la lección 13 depende de `lesson-v2-ts-funciones-genericos` (lección 12), preservando una sola cadena de desbloqueo secuencial a lo largo de las 15 lecciones piloto. El módulo 5 legacy en `curriculum.ts` sigue sin tocarse.
+
+Evidencia de verificación, con el conteo explícito para no confundir estados:
+
+| Momento | Pruebas | Referencia |
+|---|---|---|
+| Antes de las lecciones 13–15 (estado posterior al módulo 4) | **52** | ver "Update — seguimiento (módulo 4)" arriba |
+| Después de las lecciones 13–15 | **59** | esta sección |
+
+Las 52 pruebas del bloque anterior siguen siendo el registro correcto de aquel momento y no se reescriben. Las 7 pruebas nuevas cubren las tres lecciones de React, incluida la que verifica que ninguna depende de un DOM/JSX real.
+
+Verificación de esta iteración, ejecutada de forma independiente y no tomada del reporte previo: `npx tsc --noEmit` sin errores, `vitest run` con 59 pruebas en 6 archivos, `npm run build` exitoso. Re-ejecutada el 2026-07-31 antes de commitear (`669b73a`), con el mismo resultado.
 
 ## Alternatives considered
 
