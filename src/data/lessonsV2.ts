@@ -1,4 +1,4 @@
-import { ArrowUp, Boxes, Braces, Brain, Code, FileCode, GitBranch, GitCommit, Globe, Layers, Puzzle, RefreshCw, Sliders, Terminal, Zap } from 'lucide-react';
+import { ArrowUp, Boxes, Braces, Brain, Code, FileCode, GitBranch, GitCommit, Globe, Layers, Puzzle, RefreshCw, Server, Sliders, Terminal, Zap } from 'lucide-react';
 import type { LessonV2 } from '../types/lesson';
 
 /**
@@ -10,16 +10,15 @@ import type { LessonV2 } from '../types/lesson';
  * siguientes cubren JS moderno y asincronía (territorio del módulo 2 legacy:
  * arrow functions, destructuring, template literals, promesas, async/await y
  * fetch); las 3 siguientes cubren terminal, Git y Conventional Commits
- * (territorio del módulo 3 legacy: staging area y commit, ramas, y el estándar
- * de mensajes de commit); las 3 últimas (agregadas en esta microtarea) cubren
- * TypeScript esencial (territorio del módulo 4 legacy: tipos primitivos,
- * interfaces y funciones/genéricos tipados). El sandbox de ejecución solo
- * corre JavaScript (ver `src/features/sandbox/`), así que los retos de estas 3
- * lecciones simulan en JS puro, en tiempo de ejecución, la misma verificación
- * de tipos que TypeScript haría en el editor — mismo patrón que ya usaba el
- * sandbox del módulo 4 legacy (`validarDocente` en `curriculum.ts`). No
- * sustituyen `MODULES`; conviven con él mientras se valida el contrato antes
- * de migrar el resto del currículo.
+ * (territorio del módulo 3 legacy); las 3 siguientes cubren TypeScript
+ * esencial (territorio del módulo 4 legacy); las 3 siguientes cubren React
+ * esencial (territorio del módulo 5 legacy); y las 3 últimas cubren backend
+ * con Node.js y Express (territorio del módulo 6 legacy: HTTP y REST, rutas
+ * Express y CRUD). El sandbox solo corre JavaScript (ver
+ * `src/features/sandbox/`), así que los retos que dependen de herramientas,
+ * TypeScript, React o Node/Express simulan en JS puro su comportamiento
+ * observable, siguiendo el patrón de los módulos legacy. No sustituyen
+ * `MODULES`; conviven con él hasta completar la migración del currículo.
  */
 export const LESSONS_V2: LessonV2[] = [
   {
@@ -1942,6 +1941,370 @@ export const LESSONS_V2: LessonV2[] = [
       'Identifico cuándo un dato compartido debe "subir" al padre común.',
       'Distingo una prop-función (para avisar) de una prop-dato (para mostrar).',
       'Escribí un patrón completo de estado levantado: el padre guarda, pasa hacia abajo, y recibe avisos hacia arriba.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-backend-http-metodos',
+    moduleId: 'mod-6-v2',
+    phaseId: 'fase-2',
+    order: 16,
+    title: 'V2.16 HTTP y REST: el idioma entre el navegador y el servidor',
+    category: 'Backend',
+    summary: 'Entiende el modelo petición-respuesta de HTTP y cuándo usar GET, POST, PUT y DELETE.',
+    prerequisiteLessonIds: ['lesson-v2-react-levantar-estado'],
+    estimatedMinutes: 40,
+    xpReward: 90,
+    icon: Server,
+    color: 'from-emerald-500 to-green-700',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Explicar el modelo de petición y respuesta de HTTP.',
+      'Elegir el método HTTP correcto (GET, POST, PUT, DELETE) para una operación dada.',
+      'Interpretar los códigos de estado más comunes (200, 201, 404, 500) para saber qué pasó con una petición.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'HTTP es el protocolo con el que el navegador (cliente) le habla a un servidor. Una petición tiene un método que describe la intención: `GET` (leer), `POST` (crear), `PUT` (actualizar) o `DELETE` (borrar). La respuesta trae un código de estado de tres dígitos: 200 (todo bien), 201 (creado), 404 (no encontrado) o 500 (error del servidor).',
+      whyItMattersMarkdown:
+        'Toda la web funciona con peticiones HTTP. Leer una API o la documentación de un backend se reduce a entender métodos, rutas y códigos de estado; sin ese vocabulario no puedes consumir ni construir un servicio.',
+      realWorldContextMarkdown:
+        'En SASE, cuando el frontend necesita la lista de alumnos manda un `GET /api/alumnos`; cuando un profesor registra una calificación manda un `POST`. Si la URL no existe, el servidor responde 404 y la app puede mostrar "no encontrado" en vez de inventar datos.',
+      narrationText:
+        'HTTP es el idioma entre el navegador y el servidor. GET lee, POST crea, PUT actualiza y DELETE borra. El servidor responde con un código que explica el resultado.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-metodo-y-codigo',
+        title: 'El método describe la intención; el código, el resultado',
+        code:
+          'GET /api/alumnos      -> leer la lista\nPOST /api/alumnos     -> crear un alumno nuevo\nPUT /api/alumnos/1    -> actualizar el alumno 1\nDELETE /api/alumnos/1 -> borrar el alumno 1\n\n200 OK        -> la petición funcionó\n201 Created   -> se creó un recurso\n404 Not Found -> no existe lo que pediste\n500 Internal Server Error -> falló el servidor',
+        explanationMarkdown:
+          'El método dice qué intención tienes con el recurso; el código de respuesta dice si esa intención se cumplió y cómo terminó.',
+      },
+      {
+        id: 'ejemplo-leer-vs-crear',
+        title: 'Dos peticiones distintas sobre el mismo recurso',
+        code:
+          '// Leer no cambia nada en el servidor\nGET /api/alumnos\n\n// Crear agrega un registro nuevo\nPOST /api/alumnos\n{ "nombre": "Valeria", "nota": 9 }',
+        explanationMarkdown:
+          '`GET` no debe cambiar datos. Cuando quieres agregar un registro, usas `POST` y envías sus datos en el cuerpo de la petición, normalmente como JSON.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: 'Quieres leer la lista de alumnos. ¿Qué método HTTP usas?',
+        codeSnippet: '______ /api/alumnos',
+        options: ['GET', 'POST', 'PUT', 'DELETE'],
+        correctAnswer: 'GET',
+        hints: ['La operación no crea, actualiza ni borra ningún dato.', 'El método de lectura empieza con G.'],
+        explanationMarkdown: '`GET` solicita una representación del recurso sin modificarlo.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: 'Quieres registrar un alumno nuevo en el sistema. ¿Qué método usas?',
+        options: ['POST', 'GET', 'PUT', 'DELETE'],
+        correctAnswer: 'POST',
+        hints: ['La operación crea un recurso que antes no existía.'],
+        explanationMarkdown: '`POST` se usa para crear un recurso nuevo dentro de una colección.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: 'El servidor responde 404. ¿Qué significa?',
+        options: ['El recurso que pediste no existe', 'Todo salió bien', 'El servidor falló internamente', 'Se creó un recurso'],
+        correctAnswer: 'El recurso que pediste no existe',
+        hints: ['404 es el código que aparece cuando una página o ruta no fue encontrada.'],
+        explanationMarkdown: '`404 Not Found` indica que el servidor entendió la petición, pero no encontró el recurso solicitado.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: 'Quieres actualizar la calificación de un alumno que ya existe. ¿Qué método usas?',
+        options: ['PUT', 'GET', 'POST', 'DELETE'],
+        correctAnswer: 'PUT',
+        hints: ['El recurso ya existe; no vas a crear otro ni a borrarlo.'],
+        explanationMarkdown: '`PUT` representa la actualización de un recurso existente en este currículo.',
+      },
+    ],
+    challenge: {
+      id: 'reto-http-metodos',
+      promptMarkdown:
+        'Completa `simularPeticion(metodo, recursoExiste)` para que devuelva la línea de estado correcta según el método y si el recurso existe.',
+      starterCode:
+        'function simularPeticion(metodo, recursoExiste) {\n  // GET con recurso    -> "200 OK: recurso encontrado"\n  // GET sin recurso    -> "404 Not Found: recurso no existe"\n  // POST               -> "201 Created: recurso creado"\n  // DELETE con recurso -> "200 OK: recurso eliminado"\n  // DELETE sin recurso -> "404 Not Found: recurso no existe"\n  return "";\n}\n\nconsole.log(simularPeticion("GET", true));\nconsole.log(simularPeticion("GET", false));\nconsole.log(simularPeticion("POST", false));\nconsole.log(simularPeticion("DELETE", true));\nconsole.log(simularPeticion("DELETE", false));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-get-existe', type: 'stdoutIncludes', label: 'GET existente -> 200 OK', value: '200 OK: recurso encontrado', failureMessage: 'Un GET de un recurso existente debe responder "200 OK: recurso encontrado".' },
+        { id: 'check-no-existe', type: 'stdoutIncludes', label: 'Recurso inexistente -> 404 Not Found', value: '404 Not Found: recurso no existe', failureMessage: 'Cuando el recurso no existe, GET y DELETE deben responder 404 Not Found.' },
+        { id: 'check-post', type: 'stdoutIncludes', label: 'POST -> 201 Created', value: '201 Created: recurso creado', failureMessage: 'POST crea un recurso y debe responder "201 Created: recurso creado".' },
+        { id: 'check-delete', type: 'stdoutIncludes', label: 'DELETE existente -> 200 OK', value: '200 OK: recurso eliminado', failureMessage: 'DELETE de un recurso existente debe confirmar que fue eliminado.' },
+      ],
+      hints: [
+        'Resuelve primero el caso POST, que no depende de recursoExiste.',
+        'Para GET y DELETE, revisa recursoExiste antes de construir la respuesta.',
+        'GET encuentra; DELETE elimina. Ambos responden 404 cuando el recurso no existe.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar, en orden: "200 OK: recurso encontrado", "404 Not Found: recurso no existe", "201 Created: recurso creado", "200 OK: recurso eliminado" y otro 404 para el DELETE inexistente.',
+    },
+    reflectionPromptMarkdown:
+      'Piensa en un formulario de tu trabajo (registro de una incidencia, alta de un alumno). ¿Qué método HTTP crees que usa esa app por debajo y qué significa el "cargando..." que ves?',
+    masteryCriteria: [
+      'Elijo el método HTTP correcto (GET, POST, PUT o DELETE) según la operación.',
+      'Interpreto los códigos 200, 201, 404 y 500 sin buscar en la documentación.',
+      'Sé que GET no debe modificar datos y que POST, PUT y DELETE sí pueden hacerlo.',
+      'Escribí una función que decide la respuesta HTTP según el método y si el recurso existe.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-backend-express-rutas',
+    moduleId: 'mod-6-v2',
+    phaseId: 'fase-2',
+    order: 17,
+    title: 'V2.17 Express: rutas que responden JSON',
+    category: 'Backend',
+    summary: 'Registra rutas con app.get/app.post y responde datos con res.json(), igual que un servidor real de Node.',
+    prerequisiteLessonIds: ['lesson-v2-backend-http-metodos'],
+    estimatedMinutes: 50,
+    xpReward: 105,
+    icon: Server,
+    color: 'from-emerald-500 to-green-700',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Registrar una ruta en Express con app.get/app.post y el orden correcto de sus argumentos.',
+      'Explicar qué hace res.json() y por qué el frontend recibe JSON.',
+      'Distinguir los argumentos req (petición) y res (respuesta) de un handler.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'Express es un framework para construir servidores con Node.js. Para responder una ruta escribes `app.get("/ruta", (req, res) => { res.json(datos); });`. Express compara la petición entrante contra las rutas registradas: cuando el método y la ruta coinciden, ejecuta el handler. El handler recibe `req` (lo que mandó el cliente) y `res` (la respuesta que vas a devolver).',
+      whyItMattersMarkdown:
+        'Este patrón aparece en casi cualquier backend Node que vayas a leer o escribir. Si entiendes cómo se registra una ruta y qué hace `res.json()`, ya puedes construir el esqueleto de una API y seguir el flujo de una petición real.',
+      realWorldContextMarkdown:
+        'En el backend de SASE, `app.get("/api/alumnos", ...)` devuelve la lista de alumnos y `app.post("/api/calificaciones", ...)` recibe la calificación capturada en el frontend. El middleware `express.json()` convierte el cuerpo JSON en el objeto `req.body` antes de llegar al handler.',
+      narrationText:
+        'Express registra rutas con app.get y app.post. Cuando una petición coincide, ejecuta un handler que recibe req y res; res.json envía los datos al cliente como JSON.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-ruta-get',
+        title: 'La ruta Express más básica',
+        code:
+          'const express = require("express");\nconst app = express();\n\napp.get("/api/alumnos", (req, res) => {\n  res.json([{ id: 1, nombre: "Valeria" }]);\n});\n\napp.listen(3000);',
+        explanationMarkdown:
+          '`app.get` registra la ruta; el primer argumento es la URL y el segundo es el handler que se ejecuta cuando llega un GET. `res.json(...)` envía el arreglo como JSON.',
+      },
+      {
+        id: 'ejemplo-middleware-json',
+        title: 'Middleware para leer el cuerpo de la petición',
+        code:
+          'const express = require("express");\nconst app = express();\napp.use(express.json());\n\napp.post("/api/alumnos", (req, res) => {\n  const alumno = req.body;\n  res.json({ guardado: true, alumno });\n});',
+        explanationMarkdown:
+          '`app.use(express.json())` corre antes de los handlers y convierte el cuerpo JSON en un objeto disponible en `req.body`. Sin ese middleware, el handler no podría leer esos datos de esa forma.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué método de Express usas para registrar una ruta que responda a peticiones GET?',
+        codeSnippet: 'app.____("/api/alumnos", handler);',
+        options: ['get', 'getRequest', 'fetch', 'routeGet'],
+        correctAnswer: 'get',
+        hints: ['Express usa el nombre del método HTTP en minúsculas.'],
+        explanationMarkdown: '`app.get(ruta, handler)` registra un handler para peticiones HTTP GET.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué método del objeto res convierte los datos a JSON y los manda al cliente?',
+        codeSnippet: 'res.____(alumnos);',
+        options: ['json', 'sendHtml', 'render', 'write'],
+        correctAnswer: 'json',
+        hints: ['El nombre del método coincide con el formato de respuesta.'],
+        explanationMarkdown: '`res.json(datos)` serializa el valor a JSON y termina la respuesta HTTP.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: '¿Dónde están los datos enviados en el cuerpo de un POST después de usar express.json()?',
+        options: ['req.body', 'req.query', 'res.body', 'req.params'],
+        correctAnswer: 'req.body',
+        hints: ['req representa la petición; body significa cuerpo.'],
+        explanationMarkdown: 'El middleware deja el cuerpo ya convertido a objeto en `req.body`.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: 'En `(req, res) => { ... }`, ¿qué contiene cada argumento?',
+        options: [
+          'req es la petición entrante y res es la respuesta que vamos a enviar',
+          'req es la respuesta y res es la petición',
+          'Ambos son el mismo objeto',
+          'req es la ruta y res es el método',
+        ],
+        correctAnswer: 'req es la petición entrante y res es la respuesta que vamos a enviar',
+        hints: ['request = petición; response = respuesta.'],
+        explanationMarkdown: '`req` permite leer lo que llegó; `res` permite construir y enviar lo que regresará al cliente.',
+      },
+    ],
+    challenge: {
+      id: 'reto-express-rutas',
+      promptMarkdown:
+        'Completa `procesar(metodo, ruta)` dentro de `crearRouter()` para simular un mini Express: busca la coincidencia por método y ruta, responde 404 si no existe y llama al handler correcto si existe.',
+      starterCode:
+        'function crearRouter() {\n  const rutas = [];\n\n  function guardar(metodo, ruta, handler) {\n    rutas.push({ metodo, ruta, handler });\n  }\n\n  function procesar(metodo, ruta) {\n    // 1. Busca en rutas la coincidencia por metodo Y ruta\n    // 2. Si no existe, imprime: "404 Not Found: ruta no registrada"\n    // 3. Si existe, crea res con un metodo json que imprima:\n    //    "200 OK: " + JSON.stringify(datos)\n    // 4. Llama al handler con {} como req y res como respuesta\n  }\n\n  return {\n    get: (ruta, handler) => guardar("GET", ruta, handler),\n    post: (ruta, handler) => guardar("POST", ruta, handler),\n    procesar,\n  };\n}\n\nconst app = crearRouter();\napp.get("/api/alumnos", (req, res) => res.json([{ id: 1, nombre: "Valeria" }]));\napp.post("/api/alumnos", (req, res) => res.json({ id: 2, nombre: "Marco" }));\n\napp.procesar("GET", "/api/alumnos");\napp.procesar("POST", "/api/alumnos");\napp.procesar("GET", "/api/incidencias");',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-get', type: 'stdoutIncludes', label: 'GET registrado -> JSON de Valeria', value: '200 OK: [{"id":1,"nombre":"Valeria"}]', failureMessage: 'El GET registrado debe ejecutar su handler y responder el arreglo de Valeria como JSON.' },
+        { id: 'check-post', type: 'stdoutIncludes', label: 'POST registrado -> JSON de Marco', value: '200 OK: {"id":2,"nombre":"Marco"}', failureMessage: 'El POST registrado debe ejecutar un handler distinto y responder el objeto de Marco.' },
+        { id: 'check-404', type: 'stdoutIncludes', label: 'Ruta no registrada -> 404', value: '404 Not Found: ruta no registrada', failureMessage: 'Una combinación de método y ruta no registrada debe responder 404.' },
+      ],
+      hints: [
+        'Usa `rutas.find((item) => item.metodo === metodo && item.ruta === ruta)`.',
+        'El objeto res solo necesita un método `json` que llame a console.log con JSON.stringify(datos).',
+        'Cuando no hay coincidencia, imprime el 404 y usa return para no intentar ejecutar un handler inexistente.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar el JSON de Valeria para GET, el JSON de Marco para POST y "404 Not Found: ruta no registrada" para la ruta inexistente.',
+    },
+    reflectionPromptMarkdown:
+      'El mini-router decide qué handler ejecutar según método y ruta. ¿Qué problema aparecería si el servidor solo comparara la URL e ignorara el método HTTP?',
+    masteryCriteria: [
+      'Registro una ruta con app.get/app.post y los argumentos en el orden correcto.',
+      'Explico qué hace res.json() y por qué el frontend recibe JSON.',
+      'Distingo req (petición) de res (respuesta) y sé dónde vive el cuerpo en req.body.',
+      'Escribí un mini-router que despacha por método + ruta y responde 404 cuando no hay coincidencia.',
+    ],
+  },
+  {
+    schemaVersion: 2,
+    id: 'lesson-v2-backend-api-crud',
+    moduleId: 'mod-6-v2',
+    phaseId: 'fase-2',
+    order: 18,
+    title: 'V2.18 CRUD: cuatro operaciones de una API REST',
+    category: 'Backend',
+    summary: 'Diseña e implementa las rutas para listar, consultar, crear, actualizar y borrar un recurso.',
+    prerequisiteLessonIds: ['lesson-v2-backend-express-rutas'],
+    estimatedMinutes: 55,
+    xpReward: 110,
+    icon: Server,
+    color: 'from-emerald-500 to-green-700',
+    week: 'Piloto v2',
+    hours: 1,
+    learningObjectives: [
+      'Relacionar las operaciones CRUD con su método y ruta REST.',
+      'Explicar qué representa el parámetro de ruta :id y cuándo se usa.',
+      'Implementar una función que ejecute el CRUD de un recurso en memoria.',
+    ],
+    concept: {
+      explanationMarkdown:
+        'CRUD significa Create, Read, Update y Delete: las cuatro operaciones que casi todo recurso de una API necesita. En REST, cada operación combina método y ruta: `GET /recurso` (leer todos), `GET /recurso/:id` (leer uno), `POST /recurso` (crear), `PUT /recurso/:id` (actualizar) y `DELETE /recurso/:id` (borrar). Los dos puntos en `:id` marcan un parámetro de ruta disponible en `req.params.id`.',
+      whyItMattersMarkdown:
+        'Diseñar rutas consistentes antes de escribir código diferencia una API mantenible de una colección de URLs improvisadas. También es una habilidad básica de entrevista backend: explicar cómo expondrías el CRUD de un recurso.',
+      realWorldContextMarkdown:
+        'El módulo de incidencias de SASE es un CRUD: listar incidencias, ver una, crearla, actualizar su estado y borrarla. La misma forma sirve para alumnos, calificaciones o cualquier otro recurso; solo cambia el nombre de la ruta y la lógica del controlador.',
+      narrationText:
+        'CRUD es crear, leer, actualizar y borrar. GET lee, POST crea, PUT actualiza y DELETE borra. El parámetro id de la ruta identifica el registro específico.',
+    },
+    examples: [
+      {
+        id: 'ejemplo-rutas-crud',
+        title: 'Las rutas CRUD del recurso alumnos',
+        code:
+          'GET    /api/alumnos     -> leer todos\nGET    /api/alumnos/:id -> leer uno\nPOST   /api/alumnos     -> crear\nPUT    /api/alumnos/:id -> actualizar uno\nDELETE /api/alumnos/:id -> borrar uno',
+        explanationMarkdown:
+          'El patrón es igual para cualquier recurso: el nombre plural identifica la colección y `:id` señala el registro concreto.',
+      },
+      {
+        id: 'ejemplo-controlador',
+        title: 'Separar la ruta de la lógica',
+        code:
+          'function listarAlumnos(alumnos) {\n  return alumnos;\n}\n\napp.get("/api/alumnos", (req, res) => {\n  res.json(listarAlumnos(alumnos));\n});',
+        explanationMarkdown:
+          'La ruta traduce entre HTTP y tu lógica: lee `req`, llama al controlador y construye `res`. Separar la lógica permite probarla sin levantar un servidor real.',
+      },
+    ],
+    guidedPractice: [
+      {
+        id: 'guiado-1',
+        order: 1,
+        promptMarkdown: '¿Qué método y ruta usas para leer la lista completa de alumnos?',
+        options: ['GET /api/alumnos', 'GET /api/alumnos/1', 'POST /api/alumnos', 'DELETE /api/alumnos'],
+        correctAnswer: 'GET /api/alumnos',
+        hints: ['Leer usa GET; la colección completa no lleva id.'],
+        explanationMarkdown: '`GET /api/alumnos` representa la lectura de toda la colección.',
+      },
+      {
+        id: 'guiado-2',
+        order: 2,
+        promptMarkdown: '¿Qué método y ruta leen solo al alumno con id 7?',
+        options: ['GET /api/alumnos/7', 'GET /api/alumnos', 'POST /api/alumnos/7', 'DELETE /api/alumnos/7'],
+        correctAnswer: 'GET /api/alumnos/7',
+        hints: ['Leer usa GET; un registro específico agrega su id a la ruta.'],
+        explanationMarkdown: 'El valor 7 ocupa el lugar del parámetro `:id` y señala un solo recurso.',
+      },
+      {
+        id: 'guiado-3',
+        order: 3,
+        promptMarkdown: '¿Qué método usas para crear un alumno nuevo?',
+        options: ['POST', 'GET', 'PUT', 'DELETE'],
+        correctAnswer: 'POST',
+        hints: ['Crear un recurso nuevo no necesita id todavía.'],
+        explanationMarkdown: '`POST /api/alumnos` crea un miembro nuevo dentro de la colección.',
+      },
+      {
+        id: 'guiado-4',
+        order: 4,
+        promptMarkdown: 'En `DELETE /api/alumnos/:id`, ¿qué reemplaza a :id cuando quieres borrar el alumno 3?',
+        options: ['3', ':id', 'alumnos', 'DELETE'],
+        correctAnswer: '3',
+        hints: ['Los dos puntos marcan un espacio variable en la plantilla de la ruta.'],
+        explanationMarkdown: 'La petición real sería `DELETE /api/alumnos/3`; Express expondría ese valor en `req.params.id`.',
+      },
+    ],
+    challenge: {
+      id: 'reto-api-crud',
+      promptMarkdown:
+        'Completa `crudAlumnos(alumnos, metodo, id, nombreNuevo)` para leer, crear, actualizar y borrar alumnos en memoria, incluyendo respuestas 404 cuando el id no existe.',
+      starterCode:
+        'function crudAlumnos(alumnos, metodo, id, nombreNuevo) {\n  if (metodo === "GET") {\n    // Sin id -> "Lista: <N> alumno(s)"\n    // Con id -> "Alumno <id>: <nombre>" o "404: no existe el alumno <id>"\n  }\n\n  if (metodo === "POST") {\n    // Agrega { id: alumnos.length + 1, nombre: nombreNuevo }\n    // y retorna "Alumno creado: <nombre> (id <nuevoId>)"\n  }\n\n  if (metodo === "PUT") {\n    // Actualiza el nombre por id; retorna "Alumno <id> actualizado: <nombreNuevo>"\n    // o "404: no existe el alumno <id>"\n  }\n\n  if (metodo === "DELETE") {\n    // Elimina por id; retorna "Alumno <id> eliminado"\n    // o "404: no existe el alumno <id>"\n  }\n\n  return "";\n}\n\nconst alumnos = [\n  { id: 1, nombre: "Valeria" },\n  { id: 2, nombre: "Sofía" },\n];\n\nconsole.log(crudAlumnos(alumnos, "GET", null, null));\nconsole.log(crudAlumnos(alumnos, "GET", 1, null));\nconsole.log(crudAlumnos(alumnos, "GET", 9, null));\nconsole.log(crudAlumnos(alumnos, "POST", null, "Marco"));\nconsole.log(crudAlumnos(alumnos, "PUT", 1, "Valeria Ruiz"));\nconsole.log(crudAlumnos(alumnos, "DELETE", 2, null));',
+      language: 'javascript',
+      timeoutMs: 2000,
+      checks: [
+        { id: 'check-lista', type: 'stdoutIncludes', label: 'Lista: 2 alumno(s)', value: 'Lista: 2 alumno(s)', failureMessage: 'GET sin id debe contar los dos alumnos iniciales.' },
+        { id: 'check-uno', type: 'stdoutIncludes', label: 'Alumno 1: Valeria', value: 'Alumno 1: Valeria', failureMessage: 'GET con id 1 debe encontrar y describir a Valeria.' },
+        { id: 'check-no-encontrado', type: 'stdoutIncludes', label: 'Id inexistente -> 404', value: '404: no existe el alumno 9', failureMessage: 'GET con id 9 debe responder 404 porque ese alumno no existe.' },
+        { id: 'check-creado', type: 'stdoutIncludes', label: 'Alumno creado: Marco (id 3)', value: 'Alumno creado: Marco (id 3)', failureMessage: 'POST debe agregar a Marco con el siguiente id disponible, que en este caso es 3.' },
+        { id: 'check-actualizado', type: 'stdoutIncludes', label: 'Alumno 1 actualizado: Valeria Ruiz', value: 'Alumno 1 actualizado: Valeria Ruiz', failureMessage: 'PUT debe encontrar al alumno 1, actualizar su nombre y confirmar el nuevo valor.' },
+        { id: 'check-eliminado', type: 'stdoutIncludes', label: 'Alumno 2 eliminado', value: 'Alumno 2 eliminado', failureMessage: 'DELETE con id 2 debe encontrar y eliminar ese registro.' },
+      ],
+      hints: [
+        'Para GET con id usa `alumnos.find((alumno) => alumno.id === id)` y revisa si existe.',
+        'En POST calcula el nuevo id antes de hacer `alumnos.push(nuevoAlumno)`.',
+        'Para PUT usa `find`, cambia la propiedad nombre y retorna el mensaje con el valor nuevo.',
+        'Para DELETE usa `findIndex` y, si el índice es válido, `alumnos.splice(indice, 1)`.',
+      ],
+      expectedEvidenceMarkdown:
+        'La consola debe mostrar, en orden: "Lista: 2 alumno(s)", "Alumno 1: Valeria", el 404 del id 9, "Alumno creado: Marco (id 3)", "Alumno 1 actualizado: Valeria Ruiz" y "Alumno 2 eliminado".',
+    },
+    reflectionPromptMarkdown:
+      'Elige un recurso de tu trabajo docente (expediente, incidencia o calificación). Escribe sus rutas REST para listar, consultar uno, crear, actualizar y borrar.',
+    masteryCriteria: [
+      'Relaciono las operaciones CRUD con su método y ruta REST.',
+      'Explico qué representa :id y cómo llega al controlador.',
+      'Distingo la ruta HTTP del controlador que ejecuta la lógica.',
+      'Escribí una función que ejecuta operaciones CRUD sobre un recurso en memoria y maneja ids inexistentes.',
     ],
   },
 ];

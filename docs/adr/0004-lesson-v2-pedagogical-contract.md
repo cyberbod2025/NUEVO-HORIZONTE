@@ -102,6 +102,20 @@ Las 52 pruebas del bloque anterior siguen siendo el registro correcto de aquel m
 
 Verificación de esta iteración, ejecutada de forma independiente y no tomada del reporte previo: `npx tsc --noEmit` sin errores, `vitest run` con 59 pruebas en 6 archivos, `npm run build` exitoso. Re-ejecutada el 2026-07-31 antes de commitear (`669b73a`), con el mismo resultado.
 
+## Update — seguimiento (módulo 6)
+
+Se migró el territorio del módulo 6 legacy (Backend con Node.js & Express REST API) a 3 lecciones v2 más, en `src/data/lessonsV2.ts`, sin tocar `curriculum.ts`, `LessonView`, `TimelineView` ni `lessonAdapter.ts`:
+
+16. `lesson-v2-backend-http-metodos` — modelo petición/respuesta, métodos GET/POST/PUT/DELETE y códigos 200/201/404/500 (4 pasos guiados).
+17. `lesson-v2-backend-express-rutas` — registro de rutas con `app.get`/`app.post`, `req`/`res`, `res.json()` y middleware JSON (4 pasos guiados).
+18. `lesson-v2-backend-api-crud` — rutas y lógica CRUD, parámetro `:id`, separación ruta/controlador y casos 404 (4 pasos guiados).
+
+El sandbox solo ejecuta JavaScript en un Worker, no un proceso Node ni un servidor HTTP real. Los retos simulan el comportamiento observable: selección de respuestas HTTP, despacho de handlers por método + ruta y CRUD sobre un arreglo en memoria. Es el mismo límite ya aplicado a Git, TypeScript y React: practicar la lógica verificable sin afirmar que se levantó infraestructura que el sandbox no ofrece.
+
+`prerequisiteLessonIds` encadena 16→17→18; la lección 16 depende de `lesson-v2-react-levantar-estado` (lección 15). Así se conserva una sola cadena secuencial a lo largo de las 18 lecciones v2. El módulo 6 legacy permanece intacto en `curriculum.ts`, conforme a D-005.
+
+Evidencia de esta iteración: `npx tsc --noEmit` sin errores, `npx vitest run --coverage` con **65 pruebas en 6 archivos** (antes 59) y `lessonsV2.ts` al 100 % de cobertura, y `npm run build` exitoso. El build conserva la advertencia preexistente de tamaño de chunks de Monaco; no introduce un error de compilación.
+
 ## Alternatives considered
 
 - Migrar los 12 módulos completos al contrato v2 de una vez: rechazado para esta iteración por alcance explícito (riesgo alto, sin validación previa del contrato con contenido real).

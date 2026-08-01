@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { LESSONS_V2 } from './lessonsV2';
 
 describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
-  it('define las 15 lecciones piloto (3 fundamentos + 3 JS moderno/async + 3 Git/Conventional Commits + 3 TypeScript + 3 React)', () => {
-    expect(LESSONS_V2).toHaveLength(15);
+  it('define las 18 lecciones piloto que cubren los módulos legacy 1 a 6', () => {
+    expect(LESSONS_V2).toHaveLength(18);
   });
 
-  it('tiene ids únicos y orden secuencial 1 a 15', () => {
+  it('tiene ids únicos y orden secuencial 1 a 18', () => {
     const ids = LESSONS_V2.map((lesson) => lesson.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
   });
 
   it('cada lección declara schemaVersion 2 y los campos mínimos del contrato', () => {
@@ -202,5 +202,56 @@ describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
       expect(lesson?.challenge.language).toBe('javascript');
       expect(lesson?.challenge.starterCode).not.toMatch(/<\/[A-Za-z]|\/>/); // sin cierre de etiqueta JSX
     }
+  });
+
+  it('las 3 lecciones de Backend encadenan sus prerrequisitos en orden (16 -> 17 -> 18), continuando desde React', () => {
+    const levantarEstado = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-react-levantar-estado');
+    const httpMetodos = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-backend-http-metodos');
+    const expressRutas = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-backend-express-rutas');
+    const apiCrud = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-backend-api-crud');
+
+    expect(httpMetodos?.moduleId).toBe('mod-6-v2');
+    expect(expressRutas?.moduleId).toBe('mod-6-v2');
+    expect(apiCrud?.moduleId).toBe('mod-6-v2');
+    expect(httpMetodos?.prerequisiteLessonIds).toEqual([levantarEstado?.id]);
+    expect(expressRutas?.prerequisiteLessonIds).toEqual([httpMetodos?.id]);
+    expect(apiCrud?.prerequisiteLessonIds).toEqual([expressRutas?.id]);
+  });
+
+  it('la lección de HTTP cubre métodos REST y respuestas 200, 201 y 404', () => {
+    const httpMetodos = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-backend-http-metodos');
+    const checkValues = httpMetodos?.challenge.checks.map((check) => check.value) ?? [];
+
+    expect(httpMetodos?.guidedPractice.map((step) => step.correctAnswer)).toEqual(['GET', 'POST', 'El recurso que pediste no existe', 'PUT']);
+    expect(checkValues.some((value) => value?.includes('200 OK'))).toBe(true);
+    expect(checkValues.some((value) => value?.includes('201 Created'))).toBe(true);
+    expect(checkValues.some((value) => value?.includes('404 Not Found'))).toBe(true);
+  });
+
+  it('la lección de Express simula el despacho por método + ruta y el caso 404 sin usar Node real', () => {
+    const expressRutas = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-backend-express-rutas');
+    const checkLabels = expressRutas?.challenge.checks.map((check) => check.label) ?? [];
+
+    expect(expressRutas?.challenge.language).toBe('javascript');
+    expect(expressRutas?.challenge.starterCode).toContain('const rutas = []');
+    expect(expressRutas?.challenge.starterCode).toContain('guardar("GET"');
+    expect(expressRutas?.challenge.starterCode).toContain('JSON.stringify');
+    expect(checkLabels.some((label) => label.includes('GET'))).toBe(true);
+    expect(checkLabels.some((label) => label.includes('POST'))).toBe(true);
+    expect(checkLabels.some((label) => label.includes('404'))).toBe(true);
+  });
+
+  it('la lección de CRUD verifica lista, consulta individual, alta, baja y recurso inexistente', () => {
+    const apiCrud = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-backend-api-crud');
+    const checkValues = apiCrud?.challenge.checks.map((check) => check.value) ?? [];
+
+    expect(checkValues).toEqual(expect.arrayContaining([
+      'Lista: 2 alumno(s)',
+      'Alumno 1: Valeria',
+      '404: no existe el alumno 9',
+      'Alumno creado: Marco (id 3)',
+      'Alumno 1 actualizado: Valeria Ruiz',
+      'Alumno 2 eliminado',
+    ]));
   });
 });

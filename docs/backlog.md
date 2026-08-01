@@ -1,8 +1,8 @@
 # V2 Backlog
 
-## Estado (2026-07-30)
+## Estado (2026-08-01)
 
-Piloto vertical del contrato pedagógico de lección completado y probado: ver `docs/adr/0004-lesson-v2-pedagogical-contract.md`. Define `LessonV2`/`NormalizedLesson`, un adaptador que normaliza los 12 módulos v1 existentes sin migrarlos, y ahora **15 lecciones v2 reales** (territorio de los módulos 1 a 5: variables, condicionales, función evaluadora, arrow/destructuring, promesas, async/await+fetch, staging/commit de Git, ramas, Conventional Commits, tipos básicos de TypeScript, interfaces, funciones/genéricos, props de React, useState, levantar el estado), con práctica guiada de varios pasos, pistas progresivas y feedback por check individual. No toca Supabase, autenticación, mentor IA ni el resto del currículo — eso sigue siendo el alcance de "Migrate curriculum data" más abajo, ahora con un contrato ya validado con contenido real en vez de solo el ejemplo de `docs/examples/module.example.json`. Pendiente inmediato: decidir si se migran los 7 módulos restantes a este contrato antes o después de abrir el frente de Supabase.
+Piloto vertical del contrato pedagógico de lección completado y probado: ver `docs/adr/0004-lesson-v2-pedagogical-contract.md`. Define `LessonV2`/`NormalizedLesson`, un adaptador que normaliza los 12 módulos v1 existentes sin migrarlos, y ahora **18 lecciones v2 reales** que cubren el territorio de los módulos 1 a 6: fundamentos, JavaScript moderno/async, Git/Conventional Commits, TypeScript, React y backend HTTP/Express/CRUD. Todas incluyen práctica guiada de varios pasos, pistas progresivas y feedback por check individual. D-005 fija que los módulos 7–12 se migran antes de abrir Supabase; autenticación, mentor IA y Sandpack siguen fuera de alcance. Pendiente inmediato: migrar el módulo 7 en una rama corta.
 
 Estimates are rough focused engineering days, including implementation and direct tests but excluding credential procurement, external review, and schedule contingency. Re-estimate when a story is started.
 
