@@ -1,5 +1,5 @@
-# PROYECTO-HORIZONTE
+# NUEVO HORIZONTE
 
-Nombre del paquete: `codebrain-devacademy`. Ver [CLAUDE.md](CLAUDE.md) para arquitectura y comandos.
+Nombre del paquete: `nuevo-horizonte`. Ver [CLAUDE.md](CLAUDE.md) para arquitectura y comandos.
 
-Repositorio remoto (nombre histórico, sin renombrar): `github.com/cyberbod2025/NUEVO-HORIZONTE`.
+Repositorio remoto: `github.com/cyberbod2025/NUEVO-HORIZONTE`.

@@ -5,7 +5,7 @@
 
 ## Context
 
-El producto actual ("CodeBrain DevAcademy") tiene 12 módulos v1 (`src/data/curriculum.ts`), cada uno con exactamente **una** pregunta de opción múltiple (`guidedExercise`) y **un** reto de sandbox con un solo caso de prueba basado en `output.includes(...)`. La retroalimentación es un texto fijo que no depende de lo que el estudiante escribió. El simulador de PowerShell reconoce ~6 comandos por coincidencia exacta de texto.
+El producto actual ("Nuevo Horizonte") tiene 12 módulos v1 (`src/data/curriculum.ts`), cada uno con exactamente **una** pregunta de opción múltiple (`guidedExercise`) y **un** reto de sandbox con un solo caso de prueba basado en `output.includes(...)`. La retroalimentación es un texto fijo que no depende de lo que el estudiante escribió. El simulador de PowerShell reconoce ~6 comandos por coincidencia exacta de texto.
 
 Esto no sostiene el objetivo del producto: llevar a un adulto de novato a competitivo para empleo junior/senior remoto, al estilo Brilliant (muchas micro-preguntas encadenadas, pistas progresivas, contexto de uso real, criterios explícitos de dominio). Un único módulo de 40-60 horas con una sola pregunta es profundidad de trivia, no de dominio.
 

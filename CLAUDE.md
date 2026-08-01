@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-CodeBrain DevAcademy (`package.json` name: `codebrain-devacademy`) — a Vite/React SPA that teaches JavaScript fundamentals through Brilliant-style micro-lessons, a JS sandbox, and a simulated PowerShell terminal. All content is in Spanish. No backend or credentials are currently configured; everything runs client-side with `localStorage` persistence.
+Nuevo Horizonte (`package.json` name: `nuevo-horizonte`) — a Vite/React SPA that teaches JavaScript fundamentals through Brilliant-style micro-lessons, a JS sandbox, and a simulated PowerShell terminal. All content is in Spanish. No backend or credentials are currently configured; everything runs client-side with `localStorage` persistence.
 
 ## Commands
 

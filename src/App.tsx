@@ -32,7 +32,7 @@ const INITIAL_PROGRESS = readProgress();
 const INITIAL_NORMALIZED_LESSON = normalizeLesson(MODULES[0]);
 const INITIAL_CLI_HISTORY = [
   { type: 'sys', text: 'Windows PowerShell [Versión 10.0.19045.3803]' },
-  { type: 'sys', text: '(c) Microsoft Corporation. CodeBrain DevAcademy CLI cargado.\n' },
+  { type: 'sys', text: '(c) Microsoft Corporation. Nuevo Horizonte CLI cargado.\n' },
   { type: 'info', text: 'Escribe "help" para ver la lista de comandos disponibles o selecciona un desafío arriba.' },
 ];
 

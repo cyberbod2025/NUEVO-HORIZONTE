@@ -17,7 +17,7 @@ export default function AppHeader({ streak, xp, currentLevel, onResetProgress }:
           </div>
           <div>
             <h1 className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
-              CodeBrain DevAcademy
+              Nuevo Horizonte
             </h1>
             <p className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
               <span>Ruta Mentoría Profe Hugo</span> • <span className="text-amber-400 font-mono">Estilo Brilliant</span>

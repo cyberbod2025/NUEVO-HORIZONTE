@@ -20,7 +20,7 @@ export default function WelcomeScreen({ onStartTour, onSkipTour }: WelcomeScreen
           <Brain className="w-6 h-6 text-slate-950 stroke-[2.5]" />
         </div>
         <div>
-          <p className="font-extrabold tracking-tight text-white">CodeBrain DevAcademy</p>
+          <p className="font-extrabold tracking-tight text-white">Nuevo Horizonte</p>
           <p className="text-[11px] uppercase tracking-[0.2em] text-amber-400">Ruta personal de aprendizaje</p>
         </div>
       </header>
