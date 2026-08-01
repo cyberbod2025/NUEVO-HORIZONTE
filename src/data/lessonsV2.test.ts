@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { LESSONS_V2 } from './lessonsV2';
 
 describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
-  it('define las 21 lecciones piloto que cubren los módulos legacy 1 a 7', () => {
-    expect(LESSONS_V2).toHaveLength(21);
+  it('define las 24 lecciones piloto que cubren los módulos legacy 1 a 8', () => {
+    expect(LESSONS_V2).toHaveLength(24);
   });
 
-  it('tiene ids únicos y orden secuencial 1 a 21', () => {
+  it('tiene ids únicos y orden secuencial 1 a 24', () => {
     const ids = LESSONS_V2.map((lesson) => lesson.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]);
+    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]);
   });
 
   it('cada lección declara schemaVersion 2 y los campos mínimos del contrato', () => {
@@ -300,5 +300,55 @@ describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
       const lesson = LESSONS_V2.find((l) => l.id === id);
       expect(lesson?.challenge.language).toBe('javascript');
     }
+  });
+
+  it('las 3 lecciones de Testing encadenan sus prerrequisitos en orden (22 -> 23 -> 24), continuando desde bases de datos', () => {
+    const supabaseRls = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-db-supabase-rls');
+    const aaa = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-testing-aaa');
+    const casosLimite = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-testing-casos-limite');
+    const mocksRtl = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-testing-mocks-rtl');
+
+    expect(aaa?.moduleId).toBe('mod-8-v2');
+    expect(casosLimite?.moduleId).toBe('mod-8-v2');
+    expect(mocksRtl?.moduleId).toBe('mod-8-v2');
+    expect(aaa?.prerequisiteLessonIds).toEqual([supabaseRls?.id]);
+    expect(casosLimite?.prerequisiteLessonIds).toEqual([aaa?.id]);
+    expect(mocksRtl?.prerequisiteLessonIds).toEqual([casosLimite?.id]);
+  });
+
+  it('la lección de AAA distingue dos PASS de un FAIL que muestra esperado y recibido', () => {
+    const aaa = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-testing-aaa');
+    const checkValues = aaa?.challenge.checks.map((check) => check.value) ?? [];
+
+    expect(aaa?.guidedPractice.map((step) => step.correctAnswer)).toEqual(['Arrange', 'Act', 'toBe', 'El comportamiento real ya no coincide con la regla esperada y hay que revisar el caso']);
+    expect(checkValues).toEqual(expect.arrayContaining([
+      'PASS: promedio exacto',
+      'PASS: limite aprobatorio',
+      'FAIL: caso que falla (esperado true, recibido false)',
+    ]));
+  });
+
+  it('la lección de casos límite cubre valores inválidos, ambos lados del límite y el máximo válido', () => {
+    const casosLimite = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-testing-casos-limite');
+    const checkValues = casosLimite?.challenge.checks.map((check) => check.value) ?? [];
+
+    expect(checkValues).toEqual(expect.arrayContaining([
+      '-1 -> Error: nota fuera de rango',
+      '5 -> NO APROBADO',
+      '6 -> APROBADO',
+      '10 -> APROBADO',
+      '11 -> Error: nota fuera de rango',
+    ]));
+  });
+
+  it('la lección de mocks cubre la respuesta y el error sin requerir red ni un render React real', () => {
+    const mocksRtl = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-testing-mocks-rtl');
+    const checkValues = mocksRtl?.challenge.checks.map((check) => check.value) ?? [];
+
+    expect(mocksRtl?.challenge.language).toBe('javascript');
+    expect(mocksRtl?.challenge.starterCode).toContain('clienteExitoso');
+    expect(mocksRtl?.challenge.starterCode).toContain('clienteConError');
+    expect(checkValues).toEqual(expect.arrayContaining(['Cargado: Valeria', 'Error controlado: Sin conexión']));
+    expect(mocksRtl?.concept.explanationMarkdown).toContain('getByRole');
   });
 });
