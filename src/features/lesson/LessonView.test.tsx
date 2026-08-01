@@ -283,3 +283,44 @@ describe('LessonView — migración de seguimiento (React: props, useState, leva
     expect(screen.getByText('¿Ya domino esto?')).toBeInTheDocument();
   });
 });
+
+describe('LessonView — migración de seguimiento (Backend: HTTP, Express y CRUD)', () => {
+  const httpMetodos = normalizeLesson(
+    LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-backend-http-metodos')!,
+  );
+
+  it('renderiza la lección de HTTP con sus 4 pasos guiados', () => {
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={httpMetodos}
+        lessonStage="guided"
+        guidedStepIndex={0}
+        sandboxCode={httpMetodos.challenge.starterCode}
+      />,
+    );
+
+    expect(screen.getByText(`Paso 1 de ${httpMetodos.guidedPractice.length}`)).toBeInTheDocument();
+    expect(httpMetodos.guidedPractice).toHaveLength(4);
+  });
+
+  it('muestra reflexión y criterios de dominio al superar el reto CRUD', () => {
+    const apiCrud = normalizeLesson(
+      LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-backend-api-crud')!,
+    );
+
+    render(
+      <LessonView
+        {...baseProps}
+        lesson={apiCrud}
+        lessonStage="solo"
+        guidedStepIndex={0}
+        sandboxCode={apiCrud.challenge.starterCode}
+        sandboxSuccess
+      />,
+    );
+
+    expect(screen.getByText('Pregunta de reflexión')).toBeInTheDocument();
+    expect(screen.getByText('¿Ya domino esto?')).toBeInTheDocument();
+  });
+});
