@@ -1,4 +1,5 @@
 import type { MODULES } from '../data/curriculum';
+import { applyLessonReviewFixes } from '../data/lessonReviewFixes';
 import type { LessonV2, NormalizedLesson } from '../types/lesson';
 
 /** Forma real de un elemento de `MODULES` (currículo v1), inferida del dato existente. */
@@ -17,7 +18,8 @@ export function isLessonV2(input: LegacyModule | LessonV2): input is LessonV2 {
  */
 export function normalizeLesson(input: LegacyModule | LessonV2): NormalizedLesson {
   if (isLessonV2(input)) {
-    return { ...input, sourceVersion: 2 };
+    const reviewedLesson = applyLessonReviewFixes(input);
+    return { ...reviewedLesson, sourceVersion: 2 };
   }
   return normalizeLegacyModule(input);
 }
