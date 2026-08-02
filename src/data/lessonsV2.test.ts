@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { LESSONS_V2 } from './lessonsV2';
 
 describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
-  it('define las 24 lecciones piloto que cubren los módulos legacy 1 a 8', () => {
-    expect(LESSONS_V2).toHaveLength(24);
+  it('define las 27 lecciones piloto que cubren los módulos legacy 1 a 9', () => {
+    expect(LESSONS_V2).toHaveLength(27);
   });
 
-  it('tiene ids únicos y orden secuencial 1 a 24', () => {
+  it('tiene ids únicos y orden secuencial 1 a 27', () => {
     const ids = LESSONS_V2.map((lesson) => lesson.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]);
+    expect(LESSONS_V2.map((lesson) => lesson.order)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]);
   });
 
   it('cada lección declara schemaVersion 2 y los campos mínimos del contrato', () => {
@@ -350,5 +350,25 @@ describe('LESSONS_V2 — cumplimiento del contrato pedagógico v2', () => {
     expect(mocksRtl?.challenge.starterCode).toContain('clienteConError');
     expect(checkValues).toEqual(expect.arrayContaining(['Cargado: Valeria', 'Error controlado: Sin conexión']));
     expect(mocksRtl?.concept.explanationMarkdown).toContain('getByRole');
+  });
+
+  it('las 3 lecciones de IA encadenan 25 -> 26 -> 27 y no requieren un proveedor real', () => {
+    const mocks = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-testing-mocks-rtl');
+    const prompts = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ia-prompts');
+    const rag = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ia-rag');
+    const api = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ia-api-segura');
+    expect(prompts?.prerequisiteLessonIds).toEqual([mocks?.id]);
+    expect(rag?.prerequisiteLessonIds).toEqual([prompts?.id]);
+    expect(api?.prerequisiteLessonIds).toEqual([rag?.id]);
+    expect([prompts, rag, api].every((lesson) => lesson?.challenge.language === 'javascript')).toBe(true);
+  });
+
+  it('la IA cubre restricción, recuperación mínima y respuesta validada', () => {
+    const prompts = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ia-prompts');
+    const rag = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ia-rag');
+    const api = LESSONS_V2.find((lesson) => lesson.id === 'lesson-v2-ia-api-segura');
+    expect(prompts?.challenge.checks.some((check) => check.value?.includes('no inventar datos'))).toBe(true);
+    expect(rag?.challenge.checks.some((check) => check.value?.includes('asistencia mínima'))).toBe(true);
+    expect(api?.challenge.checks.map((check) => check.value)).toEqual(expect.arrayContaining(['Sugerencia: Prueba el caso límite de 6.', 'Error controlado: respuesta no válida']));
   });
 });

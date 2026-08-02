@@ -144,6 +144,14 @@ El sandbox solo ejecuta JavaScript en un Worker: no instala Vitest, no carga Rea
 
 Evidencia de esta iteración: `npx tsc --noEmit` sin errores, `npx vitest run --coverage` con **74 pruebas en 6 archivos** (antes 70) y `lessonsV2.ts` al 100 % de cobertura, y `npm run build` exitoso. El build conserva la advertencia preexistente de tamaño de chunks de Monaco; no introduce un error de compilación.
 
+## Update — seguimiento (módulo 9)
+
+Se migró el territorio del módulo 9 legacy (IA Aplicada, Prompts & Integración LLM) a tres lecciones v2: prompts estructurados (25), RAG con contexto mínimo y recuperado (26), y límites de integración de API LLM (27). `prerequisiteLessonIds` encadena 24→25→26→27; `curriculum.ts` permanece intacto.
+
+Los ejemplos enseñan sintaxis y límites, pero el sandbox solo ejecuta JS local: no llama Gemini/OpenAI, no usa red, credenciales, RAG remoto ni JSX. Los retos simulan estructuración de prompts, recuperación local y validación de respuestas para no presentar el contenido curricular como infraestructura real.
+
+Evidencia de esta iteración: `npx tsc --noEmit` sin errores, `npx vitest run --coverage` con **76 pruebas en 6 archivos** (antes 74) y `lessonsV2.ts` al 100 % de cobertura, y `npm run build` exitoso.
+
 ## Alternatives considered
 
 - Migrar los 12 módulos completos al contrato v2 de una vez: rechazado para esta iteración por alcance explícito (riesgo alto, sin validación previa del contrato con contenido real).
